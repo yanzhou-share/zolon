@@ -1,0 +1,11 @@
+fastapi==0.104.1
+uvicorn==0.24.0
+streamlit==1.29.0
+chromadb==0.4.22
+sentence-transformers==2.2.2
+httpx==0.25.2
+pytest==7.4.3
+langgraph
+openai>=1.12.0
+sse-starlette>=2.0.0
+python-docx>=1.1.0

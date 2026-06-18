@@ -1,0 +1,205 @@
+INFO:__main__:Loading embedding model: BAAI/bge-small-zh...
+INFO:sentence_transformers.base.model:No device provided, using cpu
+INFO:__main__:Products already indexed (22 docs), skipping.
+INFO:     Started server process [7004]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:sentence_transformers.base.model:Loading SentenceTransformer model from BAAI/bge-small-zh.
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+Retrying in 2s [Retry 2/5].
+WARNING:huggingface_hub.utils._http:Retrying in 2s [Retry 2/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+Retrying in 4s [Retry 3/5].
+WARNING:huggingface_hub.utils._http:Retrying in 4s [Retry 3/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+Retrying in 8s [Retry 4/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 4/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+Retrying in 8s [Retry 5/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 5/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 15445.83it/s]
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 2s [Retry 2/5].
+WARNING:huggingface_hub.utils._http:Retrying in 2s [Retry 2/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 4s [Retry 3/5].
+WARNING:huggingface_hub.utils._http:Retrying in 4s [Retry 3/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 8s [Retry 4/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 4/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 8s [Retry 5/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 5/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 2s [Retry 2/5].
+WARNING:huggingface_hub.utils._http:Retrying in 2s [Retry 2/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 4s [Retry 3/5].
+WARNING:huggingface_hub.utils._http:Retrying in 4s [Retry 3/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 8s [Retry 4/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 4/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 8s [Retry 5/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 5/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+Retrying in 2s [Retry 2/5].
+WARNING:huggingface_hub.utils._http:Retrying in 2s [Retry 2/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+Retrying in 4s [Retry 3/5].
+WARNING:huggingface_hub.utils._http:Retrying in 4s [Retry 3/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+Retrying in 8s [Retry 4/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 4/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+Retrying in 8s [Retry 5/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 5/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/video_preprocessor_config.json
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 2s [Retry 2/5].
+WARNING:huggingface_hub.utils._http:Retrying in 2s [Retry 2/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 4s [Retry 3/5].
+WARNING:huggingface_hub.utils._http:Retrying in 4s [Retry 3/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 8s [Retry 4/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 4/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 8s [Retry 5/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 5/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 2s [Retry 2/5].
+WARNING:huggingface_hub.utils._http:Retrying in 2s [Retry 2/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 4s [Retry 3/5].
+WARNING:huggingface_hub.utils._http:Retrying in 4s [Retry 3/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 8s [Retry 4/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 4/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 8s [Retry 5/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 5/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 2s [Retry 2/5].
+WARNING:huggingface_hub.utils._http:Retrying in 2s [Retry 2/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 4s [Retry 3/5].
+WARNING:huggingface_hub.utils._http:Retrying in 4s [Retry 3/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 8s [Retry 4/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 4/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+Retrying in 8s [Retry 5/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 5/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/preprocessor_config.json
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 2s [Retry 2/5].
+WARNING:huggingface_hub.utils._http:Retrying in 2s [Retry 2/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 4s [Retry 3/5].
+WARNING:huggingface_hub.utils._http:Retrying in 4s [Retry 3/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 8s [Retry 4/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 4/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 8s [Retry 5/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 5/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 2s [Retry 2/5].
+WARNING:huggingface_hub.utils._http:Retrying in 2s [Retry 2/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 4s [Retry 3/5].
+WARNING:huggingface_hub.utils._http:Retrying in 4s [Retry 3/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 8s [Retry 4/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 4/5].
+'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+WARNING:huggingface_hub.utils._http:'[WinError 10060] 由于连接方在一段时间后没有正确答复或连接的主机没有反应，连接尝试失败。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/processor_config.json
+Retrying in 8s [Retry 5/5].
+WARNING:huggingface_hub.utils._http:Retrying in 8s [Retry 5/5].

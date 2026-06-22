@@ -1,7 +1,43 @@
+# 环境变量（含 API Key）
 .env
+
+# 会话数据
 sessions/
+
+# ChromaDB 向量数据库
 chroma_db/
+
+# 上传的文件
 uploads/
+
+# Python 缓存
 __pycache__/
 *.pyc
+*.pyo
+
+# 测试缓存
 .pytest_cache/
+
+# SQLite 数据库
+saas.db
+
+# 商户配置（含敏感信息）
+merchants.json
+
+# 评估日志
+eval_metrics/
+
+# MiMo Code 配置
+.mimocode/
+
+# Docker
+docker/
+.dockerignore
+
+# IDE
+.vscode/
+.idea/
+
+# 系统文件
+.DS_Store
+Thumbs.db

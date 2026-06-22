@@ -1,0 +1,30 @@
+{
+  "merchants": {
+    "zk_test12345678": {
+      "name": "测试商户",
+      "assistant_name": "小龙",
+      "status": "active",
+      "created_at": "2026-06-22T00:00:00",
+      "allowed_origins": [
+        "http://localhost:8501",
+        "http://localhost:8000",
+        "http://localhost:9000"
+      ],
+      "rate_limit": 100,
+      "daily_limit": 5000
+    },
+    "zk_415222bca031": {
+      "name": "高阳科技",
+      "assistant_name": "小羊",
+      "status": "active",
+      "created_at": "2026-06-22T10:57:24.522316",
+      "allowed_origins": [
+        "http://localhost:8501",
+        "http://localhost:9002",
+        "http://localhost:8000"
+      ],
+      "rate_limit": 97,
+      "daily_limit": 5000
+    }
+  }
+}

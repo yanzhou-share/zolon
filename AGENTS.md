@@ -26,11 +26,19 @@
 backend.py    - FastAPI 后端 + LangGraph 6 节点 + 文件上传 API
 app.py        - Streamlit 前端 + 会话持久化 + 文件上传 UI
 test_backend.py - pytest 测试用例
-sessions/     - 会话数据存储 (JSON)
-chroma_db/    - ChromaDB 持久化存储 (向量数据库)
-uploads/      - 上传的文件存储
-hf_cache/     - BGE 模型缓存
-.env          - 环境变量 (DEEPSEEK_API_KEY, HF_ENDPOINT)
+eval_tracer.py - 观测层: 请求追踪、节点计时、Token统计
+eval_retrieval.py - 检索评估: Recall@K, Precision@K, MRR, Hit Rate
+eval_generation.py - 生成评估: LLM-as-Judge (faithfulness, relevancy, hallucination)
+eval_e2e.py    - 端到端评估: correctness, quality, satisfaction
+eval_pipeline.py - 评估流水线: 自动评估、批量评估、指标导出
+eval_dataset.json - 评估测试数据集 (10条样本)
+test_eval.py   - 评估系统测试 (40个用例)
+eval_metrics/  - 评估指标输出目录 (JSONL日志 + 批量报告)
+sessions/      - 会话数据存储 (JSON)
+chroma_db/     - ChromaDB 持久化存储 (向量数据库)
+uploads/       - 上传的文件存储
+hf_cache/      - BGE 模型缓存
+.env           - 环境变量 (DEEPSEEK_API_KEY, HF_ENDPOINT)
 产品文档.txt   - 产品需求文档
 ```
 
@@ -44,6 +52,10 @@ hf_cache/     - BGE 模型缓存
 | `/upload/list` | GET | 列出已上传文件 |
 | `/upload/{filename}` | DELETE | 删除指定文件 |
 | `/health` | GET | 健康检查 |
+| `/eval/stats` | GET | 获取评估统计指标 |
+| `/eval/batch` | POST | 批量评估测试用例 |
+| `/eval/dataset` | GET | 获取评估数据集 |
+| `/eval/run-dataset` | POST | 运行完整数据集评估 |
 
 ## 开发流程
 

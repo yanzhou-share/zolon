@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>智能客服 Widget 演示</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f0f2f5; color: #1f2937; }
+.hero { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; padding: 60px 24px; text-align: center; }
+.hero h1 { font-size: 32px; margin-bottom: 12px; }
+.hero p { font-size: 16px; opacity: 0.9; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+.section { background: #fff; border-radius: 12px; padding: 32px; margin-bottom: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.section h2 { font-size: 20px; margin-bottom: 16px; color: #374151; }
+.section p { font-size: 15px; line-height: 1.7; color: #6b7280; margin-bottom: 12px; }
+code { background: #f3f4f6; padding: 2px 8px; border-radius: 4px; font-size: 14px; color: #667eea; }
+pre { background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.6; margin-top: 12px; }
+pre code { background: none; color: inherit; padding: 0; }
+.footer { text-align: center; padding: 24px; color: #9ca3af; font-size: 13px; }
+.step { display: flex; gap: 16px; margin-bottom: 20px; }
+.step-num { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 600; flex-shrink: 0; }
+.step-content { flex: 1; }
+.step-content h3 { font-size: 16px; margin-bottom: 6px; color: #374151; }
+.step-content p { font-size: 14px; color: #6b7280; line-height: 1.6; }
+.try-it { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 1px solid #86efac; }
+.try-it h2 { color: #166534; }
+.try-it p { color: #166534; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>智能客服 Widget 集成演示</h1>
+  <p>右下角已出现浮动按钮，点击开始对话</p>
+</div>
+
+<div class="container">
+  <div class="section">
+    <h2>如何集成到你的网站</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>设置 API 地址</h3>
+        <p>在 Widget 加载前设置后端地址：</p>
+        <pre><code>&lt;script&gt;window.AI_CHAT_API_URL = 'https://your-api-domain.com';&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>设置 API Key</h3>
+        <p>配置商户 API Key（从管理后台获取）：</p>
+        <pre><code>&lt;script&gt;window.AI_CHAT_API_KEY = 'zk_your_api_key';&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>引入 Widget</h3>
+        <p>只需一行代码即可集成：</p>
+        <pre><code>&lt;script src="http://your-server:8000/static/widget.js"&gt;&lt;/script&gt;</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="section try-it">
+    <h2>立即试试</h2>
+    <p>点击右下角的浮动按钮，开始与 AI 客服对话。支持流式回复、多轮对话、历史记录保存。</p>
+  </div>
+
+  <div class="section">
+    <h2>功能特性</h2>
+    <p>&#x2714; 浮动按钮，右下角固定定位</p>
+    <p>&#x2714; 点击弹出聊天面板，平滑动画过渡</p>
+    <p>&#x2714; SSE 流式响应，逐字渲染</p>
+    <p>&#x2714; 支持 Shift+Enter 换行，Enter 发送</p>
+    <p>&#x2714; 多轮对话历史，localStorage 持久化</p>
+    <p>&#x2714; 移动端全屏适配</p>
+    <p>&#x2714; 人工转接提示</p>
+  </div>
+</div>
+
+<div class="footer">
+  智能客服 Widget Demo &mdash; Powered by FastAPI + LangGraph
+</div>
+
+<script>window.AI_CHAT_API_URL = 'http://localhost:8000';</script>
+<script>window.AI_CHAT_API_KEY = 'zk_415222bca031';</script>
+<script src="/static/widget.js?v=2"></script>
+</body>
+</html>

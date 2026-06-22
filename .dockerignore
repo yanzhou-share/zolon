@@ -1,0 +1,14 @@
+.env
+.git
+.gitignore
+__pycache__
+*.pyc
+.pytest_cache
+sessions/
+chroma_db/
+uploads/
+hf_cache/
+*.md
+test_backend.py
+test_eval.py
+eval_metrics/

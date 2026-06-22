@@ -1,0 +1,87 @@
+{
+  "description": "RAG evaluation test dataset for AI Sales Assistant",
+  "version": "2.0",
+  "created_at": "2026-06-18",
+  "test_cases": [
+    {
+      "id": "TC001",
+      "query": "你好",
+      "expected_answer": "您好！很高兴为您服务！请问有什么可以帮助您的？",
+      "relevant_keywords": [],
+      "intent": "greeting",
+      "category": "greeting"
+    },
+    {
+      "id": "TC002",
+      "query": "你们有什么产品？",
+      "expected_answer": "我们有多种产品可供选择，请问您想了解哪方面信息？",
+      "relevant_keywords": ["产品"],
+      "intent": "feature_inquiry",
+      "category": "general"
+    },
+    {
+      "id": "TC003",
+      "query": "价格是多少？",
+      "expected_answer": "请告诉我您想了解哪个产品的价格？",
+      "relevant_keywords": ["价格"],
+      "intent": "pricing_query",
+      "category": "pricing"
+    },
+    {
+      "id": "TC004",
+      "query": "有优惠活动吗？",
+      "expected_answer": "目前暂无特别优惠活动，如有最新促销信息我们会及时通知。",
+      "relevant_keywords": ["优惠", "活动", "促销"],
+      "intent": "pricing_query",
+      "category": "pricing"
+    },
+    {
+      "id": "TC005",
+      "query": "怎么退货？",
+      "expected_answer": "您好，请问是什么原因需要退货呢？我可以帮您了解退货流程。",
+      "relevant_keywords": ["退货", "退款"],
+      "intent": "support",
+      "category": "support"
+    },
+    {
+      "id": "TC006",
+      "query": "有什么功能？",
+      "expected_answer": "请问您想了解哪个产品的功能？请提供更多信息以便我为您准确介绍。",
+      "relevant_keywords": ["功能"],
+      "intent": "feature_inquiry",
+      "category": "features"
+    },
+    {
+      "id": "TC007",
+      "query": "这个怎么样？",
+      "expected_answer": "请问您指的是哪个产品呢？请告诉我具体名称，我来为您详细介绍。",
+      "relevant_keywords": [],
+      "intent": "feature_inquiry",
+      "category": "general"
+    },
+    {
+      "id": "TC008",
+      "query": "可以分期吗？",
+      "expected_answer": "请问您想了解哪个产品的分期付款政策？",
+      "relevant_keywords": ["分期"],
+      "intent": "pricing_query",
+      "category": "pricing"
+    },
+    {
+      "id": "TC009",
+      "query": "售后服务怎么样？",
+      "expected_answer": "我们提供完善的售后服务，包括7天无理由退换货和1年质保。",
+      "relevant_keywords": ["售后", "保修", "退换"],
+      "intent": "support",
+      "category": "support"
+    },
+    {
+      "id": "TC010",
+      "query": "你好，我想了解一下你们的产品，有什么推荐吗？",
+      "expected_answer": "您好！很高兴为您服务。请问您有什么具体需求？比如预算、使用场景等，我可以为您推荐合适的产品。",
+      "relevant_keywords": [],
+      "intent": "greeting",
+      "category": "general"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  ai-sales-agent:
+    build: .
+    ports:
+      - "8000:8000"
+      - "8501:8501"
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - ./uploads:/app/uploads
+      - ./sessions:/app/sessions
+      - ./hf_cache:/app/hf_cache
+    env_file:
+      - .env
+    environment:
+      - HF_ENDPOINT=https://hf-mirror.com
+    restart: unless-stopped

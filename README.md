@@ -127,9 +127,113 @@ zolon/
 ├── test_backend.py     # 测试用例
 ├── requirements.txt    # 依赖列表
 ├── .env                # 环境变量
+├── Dockerfile          # Docker 镜像配置
+├── docker-compose.yml  # Docker Compose 配置
 ├── chroma_db/          # ChromaDB 持久化存储
 ├── uploads/            # 上传的文件
 ├── sessions/           # 会话数据
 ├── hf_cache/           # BGE 模型缓存
 └── README.md           # 项目说明
+```
+
+## Docker 部署
+
+### 前置条件
+
+- 安装 [Docker](https://docs.docker.com/get-docker/)
+- 安装 [Docker Compose](https://docs.docker.com/compose/install/)（可选）
+
+### 方式1: Docker Compose（推荐）
+
+```bash
+# 1. 创建环境变量文件
+cat > .env << EOF
+DEEPSEEK_API_KEY=sk-xxx
+HF_ENDPOINT=https://hf-mirror.com
+EOF
+
+# 2. 启动服务
+docker-compose up -d
+
+# 3. 查看日志
+docker-compose logs -f
+
+# 4. 停止服务
+docker-compose down
+
+# 5. 重启服务
+docker-compose restart
+
+# 6. 查看容器状态
+docker-compose ps
+```
+
+### 方式2: Docker
+
+```bash
+# 1. 构建镜像
+docker build -t ai-sales-agent .
+
+# 2. 运行容器
+docker run -d \
+  --name ai-sales-agent \
+  -p 8000:8000 \
+  -p 8501:8501 \
+  -v $(pwd)/chroma_db:/app/chroma_db \
+  -v $(pwd)/uploads:/app/uploads \
+  -v $(pwd)/sessions:/app/sessions \
+  -v $(pwd)/hf_cache:/app/hf_cache \
+  -e DEEPSEEK_API_KEY=sk-xxx \
+  -e HF_ENDPOINT=https://hf-mirror.com \
+  ai-sales-agent
+
+# 3. 查看日志
+docker logs -f ai-sales-agent
+
+# 4. 停止容器
+docker stop ai-sales-agent
+
+# 5. 删除容器
+docker rm ai-sales-agent
+```
+
+### 访问服务
+
+启动成功后：
+
+- **前端界面**: http://localhost:8501
+- **后端 API**: http://localhost:8000
+- **健康检查**: http://localhost:8000/health
+
+### 数据持久化
+
+以下目录会挂载到宿主机，重启后数据不丢失：
+
+| 目录 | 说明 |
+|------|------|
+| `chroma_db/` | ChromaDB 向量数据库 |
+| `uploads/` | 上传的知识文档 |
+| `sessions/` | 会话历史记录 |
+| `hf_cache/` | BGE 模型缓存（约183MB） |
+
+### 常见问题
+
+**Q: 首次启动很慢？**
+
+A: 首次启动需要下载 BGE 模型（约183MB），后续启动会从缓存加载。可配置 `HF_ENDPOINT=https://hf-mirror.com` 使用国内镜像加速。
+
+**Q: 如何更新代码？**
+
+A: 修改代码后重新构建镜像：
+```bash
+docker-compose down
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+**Q: 如何查看容器内日志？**
+
+A: 
+```bash
+docker-compose logs -f ai-sales-agent
 ```

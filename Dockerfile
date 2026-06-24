@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Stage 1: Install dependencies
-FROM uhub.service.ucloud.cn/tt139/python:3.10-slim AS deps
+FROM python:3.10-slim AS deps
 WORKDIR /app
 
 COPY requirements.txt .
@@ -9,7 +9,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --only-binary :all: -i https://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com -r requirements.txt
 
 # Stage 2: Final image (without build tools)
-FROM uhub.service.ucloud.cn/tt139/python:3.10-slim
+FROM python:3.10-slim
 WORKDIR /app
 
 # Copy installed packages from deps stage
@@ -18,9 +18,10 @@ COPY --from=deps /usr/local/bin /usr/local/bin
 
 # Copy application code
 COPY *.py .
+COPY static/ static/
 
 # Create necessary directories
-RUN mkdir -p chroma_db uploads hf_cache
+RUN mkdir -p chroma_db uploads hf_cache sessions eval_metrics
 
 EXPOSE 8000 8501
 

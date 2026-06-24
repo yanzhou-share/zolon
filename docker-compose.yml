@@ -11,6 +11,7 @@ services:
       - ./uploads:/app/uploads
       - ./sessions:/app/sessions
       - ./hf_cache:/app/hf_cache
+      - ./eval_metrics:/app/eval_metrics
     env_file:
       - .env
     environment:

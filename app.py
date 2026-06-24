@@ -60,7 +60,23 @@ def delete_all_sessions():
             os.remove(os.path.join(SESSIONS_DIR, filename))
 
 
-st.set_page_config(page_title="AI 智能销售终端", page_icon="🤖", layout="wide")
+st.set_page_config(page_title="智能客服管理系统", page_icon="🤖", layout="wide")
+
+# 侧边栏顶部标题样式
+st.markdown("""
+<style>
+    [data-testid="stSidebar"] .block-container { padding-top: 1rem !important; }
+    [data-testid="stSidebarHeader"] { display: none !important; }
+    .sidebar-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #e74c3c;
+        padding: 8px 0 16px 0;
+        border-bottom: 2px solid #e74c3c;
+        margin-bottom: 16px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 BACKEND_URL = "http://localhost:8000"
 DEFAULT_GREETING = "我是您的AI智能助手小龙，随时为您服务！"
@@ -106,6 +122,7 @@ if "messages" not in st.session_state:
         save_session_messages(st.session_state["session_id"], st.session_state.messages)
 
 with st.sidebar:
+    st.markdown('<div class="sidebar-title">智能客服管理系统</div>', unsafe_allow_html=True)
     st.header("商户管理")
     merchants_data = load_merchants()
     merchant_list = merchants_data.get("merchants", {})
@@ -353,6 +370,63 @@ with tab_dashboard:
         except Exception:
             pass
 
+    # 评估趋势
+    st.markdown("---")
+    st.subheader("📈 评估趋势")
+    try:
+        resp = httpx.get(f"{BACKEND_URL}/admin/eval/trends?days=30", headers={"X-Admin-Key": ADMIN_SECRET}, timeout=10.0)
+        if resp.status_code == 200:
+            trends = resp.json().get("trends", [])
+            if trends:
+                import pandas as pd
+                df = pd.DataFrame(trends)
+                if "faithfulness" in df.columns:
+                    st.line_chart(df.set_index("date")[["faithfulness", "hallucination"]])
+            else:
+                st.info("暂无评估数据，点击下方按钮运行评估")
+    except Exception:
+        st.info("暂无评估数据")
+
+    # 评估操作
+    col_eval1, col_eval2 = st.columns(2)
+    with col_eval1:
+        if st.button("🔄 运行评估", key="btn_run_eval"):
+            with st.spinner("正在运行评估..."):
+                try:
+                    resp = httpx.post(f"{BACKEND_URL}/admin/eval/run", headers={"X-Admin-Key": ADMIN_SECRET}, timeout=120.0)
+                    if resp.status_code == 200:
+                        result = resp.json()
+                        if result.get("status") == "success":
+                            st.success("评估完成！")
+                            st.rerun()
+                        else:
+                            st.info("无评估数据")
+                except Exception as e:
+                    st.error(f"评估失败: {e}")
+
+    with col_eval2:
+        resp_alerts = httpx.get(f"{BACKEND_URL}/admin/eval/alerts?days=7", headers={"X-Admin-Key": ADMIN_SECRET}, timeout=10.0)
+        if resp_alerts.status_code == 200:
+            alert_stats = resp_alerts.json().get("stats", {})
+            unresolved = alert_stats.get("unresolved", 0)
+            if unresolved > 0:
+                st.warning(f"⚠️ {unresolved} 条未处理告警")
+            else:
+                st.success("✅ 无告警")
+
+    # 告警列表
+    try:
+        resp_alerts = httpx.get(f"{BACKEND_URL}/admin/eval/alerts?days=7", headers={"X-Admin-Key": ADMIN_SECRET}, timeout=10.0)
+        if resp_alerts.status_code == 200:
+            alerts = resp_alerts.json().get("alerts", [])
+            if alerts:
+                st.subheader("⚠️ 最近告警")
+                for alert in alerts[:5]:
+                    severity_icon = "🔴" if alert.get("severity") == "critical" else "🟡"
+                    st.caption(f"{severity_icon} {alert.get('message', '')} ({alert.get('created_at', '')[:10]})")
+    except Exception:
+        pass
+
 with tab_chat:
     for msg in st.session_state.messages:
         if msg["role"] == "assistant":
@@ -379,8 +453,7 @@ if prompt := st.chat_input("请输入您的问题..."):
 
     with st.chat_message("assistant", avatar="🤖"):
         placeholder = st.empty()
-        spinner_placeholder = st.empty()
-        spinner_placeholder.info("正在思考中...")
+        placeholder.markdown("💡 思考中...")
         full_response = ""
         sentiment_label = "neutral"
         sentiment_confidence = 0.5
@@ -411,7 +484,6 @@ if prompt := st.chat_input("请输入您的问题..."):
                             if current_event and current_data_lines:
                                 data_payload = "\n".join(current_data_lines)
                                 if current_event == "token":
-                                    spinner_placeholder.empty()
                                     full_response += data_payload
                                     placeholder.markdown(full_response + "▌")
                                 elif current_event == "done":

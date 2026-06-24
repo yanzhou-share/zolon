@@ -25,6 +25,19 @@
       ],
       "rate_limit": 97,
       "daily_limit": 5000
+    },
+    "zk_df70974fe8ae": {
+      "name": "一元店",
+      "assistant_name": "小锡",
+      "status": "active",
+      "created_at": "2026-06-23T14:24:12.303792",
+      "allowed_origins": [
+        "http://localhost:8501",
+        "http://localhost:8000",
+        "http://localhost:8501"
+      ],
+      "rate_limit": 100,
+      "daily_limit": 5000
     }
   }
 }

@@ -23,10 +23,10 @@ class GenerationMetrics:
         return asdict(self)
 
 
-FAITHFULNESS_PROMPT = """你是一个严格的内容审查员。请评估以下"回答"是否忠实于"检索到的知识"。
+FAITHFULNESS_PROMPT = """你是一个严格的内容审查员。请评估以下"回答"是否忠实于"检索到的知识"或"标准答案"。
 
 评分标准：
-- 1.0: 回答完全基于检索到的知识，没有添加任何知识库中不存在的信息
+- 1.0: 回答完全基于检索到的知识或标准答案，没有添加任何知识库中不存在的信息
 - 0.8: 回答基本基于知识，仅有少量合理推断
 - 0.5: 回答部分基于知识，部分内容无法在知识中找到依据
 - 0.2: 回答大部分与知识无关，自行编造
@@ -34,6 +34,9 @@ FAITHFULNESS_PROMPT = """你是一个严格的内容审查员。请评估以下"
 
 检索到的知识：
 {context}
+
+标准答案：
+{expected}
 
 用户问题：{query}
 
@@ -109,9 +112,14 @@ async def _llm_judge(client, prompt: str) -> dict:
         return {"score": 0.5, "reason": f"LLM judge error: {e}"}
 
 
-async def evaluate_faithfulness(client, query: str, context: str, answer: str) -> tuple[float, str]:
-    """Is the response grounded in retrieved knowledge?"""
-    prompt = FAITHFULNESS_PROMPT.format(query=query, context=context or "（无检索知识）", answer=answer)
+async def evaluate_faithfulness(client, query: str, context: str, answer: str, expected: str = "") -> tuple[float, str]:
+    """Is the response grounded in retrieved knowledge or matches expected answer?"""
+    prompt = FAITHFULNESS_PROMPT.format(
+        query=query,
+        context=context or "（无检索知识）",
+        expected=expected or "（无标准答案）",
+        answer=answer
+    )
     result = await _llm_judge(client, prompt)
     score = float(result.get("score", 0.5))
     reason = result.get("reason", "")
@@ -151,11 +159,12 @@ async def evaluate_generation(
     query: str,
     context: str,
     answer: str,
+    expected: str = "",
 ) -> GenerationMetrics:
     """Run all generation evaluation metrics."""
     m = GenerationMetrics()
 
-    m.faithfulness, m.faithfulness_reason = await evaluate_faithfulness(client, query, context, answer)
+    m.faithfulness, m.faithfulness_reason = await evaluate_faithfulness(client, query, context, answer, expected)
     m.answer_relevancy, m.answer_relevancy_reason = await evaluate_answer_relevancy(client, query, answer)
     m.context_relevancy, m.context_relevancy_reason = await evaluate_context_relevancy(client, query, context)
     m.hallucination_score, m.hallucination_reason, _ = await detect_hallucination(client, context, answer)

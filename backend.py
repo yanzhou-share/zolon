@@ -23,8 +23,9 @@ from config import llm, embed, chroma, upload, chat as chat_cfg, merchant as mer
 from models import ChatRequest, ChatResponse, BatchEvalRequest
 from merchants import load_merchants, save_merchants, generate_api_key, validate_api_key, validate_origin, check_rate_limit
 from document_parser import chunk_text, parse_txt, parse_docx, parse_pdf
+import chat_agent
 from chat_agent import (
-    init_llm, _load_embed_model, embed_texts, llm_client, embed_model,
+    init_llm, _load_embed_model, embed_texts,
     AgentState, sentiment_analyzer, query_optimizer, knowledge_retriever,
     response_generator, response_generator_stream, handover_response, human_handover_router,
     _keyword_sentiment_fallback, SALES_SOP,
@@ -460,7 +461,7 @@ async def run_manual_eval(admin_key: str = Header(alias="X-Admin-Key")):
     if admin_key != merchant_cfg.ADMIN_SECRET:
         raise HTTPException(status_code=403, detail="Invalid admin key")
     from eval_scheduler import daily_eval_task
-    report = await daily_eval_task(llm_client, knowledge_collection)
+    report = await daily_eval_task(chat_agent.llm_client, knowledge_collection)
     if report:
         return {"status": "success", "report": report.to_dict()}
     return {"status": "no_data"}
@@ -488,7 +489,7 @@ async def eval_stats():
 @app.post("/eval/batch")
 async def eval_batch(request: BatchEvalRequest):
     from eval_pipeline import batch_evaluate
-    report = await batch_evaluate(client=llm_client, test_cases=request.test_cases, knowledge_collection=knowledge_collection)
+    report = await batch_evaluate(client=chat_agent.llm_client, test_cases=request.test_cases, knowledge_collection=knowledge_collection)
     return report.to_dict()
 
 
@@ -509,7 +510,7 @@ async def eval_run_dataset():
     with open(dataset_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
     from eval_pipeline import batch_evaluate
-    report = await batch_evaluate(client=llm_client, test_cases=dataset.get("test_cases", []), knowledge_collection=knowledge_collection)
+    report = await batch_evaluate(client=chat_agent.llm_client, test_cases=dataset.get("test_cases", []), knowledge_collection=knowledge_collection)
     return report.to_dict()
 
 

@@ -136,6 +136,15 @@ async def batch_evaluate(
         expected = tc.get("expected_answer", "")
         context = tc.get("context", "")
 
+        # 如果没有 context，从知识库查询
+        if not context and knowledge_collection and knowledge_collection.count() > 0:
+            try:
+                results = knowledge_collection.query(query_texts=[query], n_results=3)
+                if results and results["documents"] and results["documents"][0]:
+                    context = "\n".join(results["documents"][0])
+            except Exception as e:
+                logger.warning(f"Knowledge query failed for eval: {e}")
+
         retrieval_metrics = None
         if tc.get("retrieved_ids") and tc.get("relevant_ids"):
             rm = evaluate_retrieval_single(
@@ -150,7 +159,7 @@ async def batch_evaluate(
         gen_metrics = None
         if context and client:
             try:
-                gm = await evaluate_generation(client, query, context, expected or "")
+                gm = await evaluate_generation(client, query, context, expected or "", expected)
                 gen_metrics = gm.to_dict()
                 total_generation += gm.faithfulness
             except Exception as e:

@@ -393,7 +393,7 @@ with tab_dashboard:
         if st.button("🔄 运行评估", key="btn_run_eval"):
             with st.spinner("正在运行评估..."):
                 try:
-                    resp = httpx.post(f"{BACKEND_URL}/admin/eval/run", headers={"X-Admin-Key": ADMIN_SECRET}, timeout=120.0)
+                    resp = httpx.post(f"{BACKEND_URL}/admin/eval/run", headers={"X-Admin-Key": ADMIN_SECRET}, timeout=600.0)
                     if resp.status_code == 200:
                         result = resp.json()
                         if result.get("status") == "success":

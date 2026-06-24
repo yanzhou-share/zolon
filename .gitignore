@@ -18,6 +18,8 @@ __pycache__/
 # 测试缓存
 .pytest_cache/
 
+.mimocode/
+
 # SQLite 数据库
 saas.db
 

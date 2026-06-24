@@ -1,48 +1,165 @@
-# AI 智能销售终端
+# 智能客服 SaaS 平台
 
-基于 FastAPI + Streamlit + ChromaDB + DeepSeek LLM 的 AI 销售助手系统。
+基于 RAG 架构的多商户智能客服 SaaS 平台，支持企业快速部署 AI 客服系统。
+
+## 技术栈
+
+| 层级 | 技术 |
+|------|------|
+| 后端框架 | Python + FastAPI |
+| AI Agent | LangGraph（6 节点状态图） |
+| LLM | DeepSeek API（可配置模型/BaseURL） |
+| 向量数据库 | ChromaDB（多租户隔离） |
+| Embedding | BGE-small-zh |
+| 前端 | Streamlit（管理后台）+ 嵌入式 Widget |
+| 数据库 | SQLite（用量统计、计费、告警） |
+| 流式响应 | SSE（Server-Sent Events） |
+| 文档解析 | python-docx + pdfplumber |
 
 ## 功能特性
 
-- **RAG 问答**: 基于 ChromaDB 向量数据库的知识库问答
-- **文件上传**: 支持 .txt 和 .docx 文件，自动切分、向量化存储
-- **情感分析**: 使用 DeepSeek LLM 实时判定用户情绪
-- **流式响应**: SSE 流式输出，逐 token 渲染
-- **会话持久化**: 对话历史保存到本地，刷新不丢失
-- **转人工**: 检测到愤怒情绪时自动转接人工客服
+### 核心功能
+- **RAG 知识库问答**: 混合检索（语义+关键词）+ Q&A 配对
+- **多租户 SaaS**: API Key 认证、域名白名单、租户知识库隔离
+- **文档支持**: txt/docx/md/pdf，表格自动转 Markdown
+- **流式响应**: SSE 逐 token 渲染
+- **情感分析**: 关键词优先 + LLM 兜底，区分产品反馈和愤怒
+- **长对话治理**: 话题检测 + 对话摘要 + 滑动窗口
 
-## 安装依赖
+### 运营功能
+- **管理后台**: 商户 CRUD、文档管理、助手名称配置
+- **运营仪表盘**: 用量统计、每日趋势、商户排行
+- **计费系统**: 每千 Token 计价、月度免费额度
+- **评估自动化**: 定时评估 + 趋势追踪 + 告警
+
+### 嵌入式 Widget
+- 一行代码集成到任意网站
+- 支持 API Key 认证
+- 流式逐字渲染 + 移动端适配
+
+## 项目结构
+
+```
+zolon/
+├── backend.py          # 主入口（FastAPI + LangGraph）
+├── config.py           # 配置管理（LLM/Embedding/Chroma等）
+├── models.py           # 数据模型（Pydantic/TypedDict）
+├── merchants.py        # 商户管理（API Key/白名单/限流）
+├── document_parser.py  # 文档解析（txt/docx/pdf/表格/分块）
+├── chat_agent.py       # Agent 节点（情感/查询/检索/生成）
+├── database.py         # SQLite 数据库（用量/计费/告警）
+├── eval_scheduler.py   # 定时评估任务
+├── eval_trends.py      # 指标趋势追踪
+├── eval_alerts.py      # 告警系统
+├── eval_pipeline.py    # 评估编排
+├── eval_retrieval.py   # 检索评估指标
+├── eval_generation.py  # 生成质量评估
+├── eval_e2e.py         # 端到端评估
+├── eval_tracer.py      # 请求追踪
+├── app.py              # Streamlit 前端
+├── widget.js           # 嵌入式聊天组件
+├── test_backend.py     # 测试用例（38个）
+├── requirements.txt    # 依赖列表
+├── .env.example        # 配置示例
+├── merchants.json      # 商户配置
+├── eval_dataset.json   # 评估测试集（30条）
+└── RESUME_PROJECT.md   # 简历项目描述
+```
+
+## 快速开始
+
+### 1. 安装依赖
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## 配置
-
-创建 `.env` 文件：
-
-```env
-DEEPSEEK_API_KEY=sk-xxx  # DeepSeek API Key（可选）
-HF_ENDPOINT=https://hf-mirror.com  # HuggingFace 镜像（加速模型下载）
-```
-
-## 启动服务
-
-### 1. 启动后端
+### 2. 配置环境变量
 
 ```bash
+cp .env.example .env
+# 编辑 .env 填入 API Key
+```
+
+### 3. 启动服务
+
+```bash
+# 后端
 python backend.py
-```
 
-后端运行在 http://localhost:8000
-
-### 2. 启动前端
-
-```bash
+# 前端（新终端）
 streamlit run app.py
 ```
 
-前端运行在 http://localhost:8501
+### 4. 访问
+
+- **管理后台**: http://localhost:8501
+- **API 文档**: http://localhost:8000/docs
+- **健康检查**: http://localhost:8000/health
+
+## 配置说明
+
+所有配置可通过环境变量或 `.env` 文件设置：
+
+| 配置项 | 默认值 | 说明 |
+|--------|--------|------|
+| `DEEPSEEK_API_KEY` | - | DeepSeek API Key |
+| `LLM_MODEL` | deepseek-chat | LLM 模型 |
+| `LLM_BASE_URL` | https://api.deepseek.com | LLM Base URL |
+| `LLM_TEMPERATURE` | 0.3 | 温度参数 |
+| `ADMIN_SECRET` | admin123 | 管理员密钥 |
+| `CHUNK_SIZE` | 500 | 文档分块大小 |
+| `MAX_HISTORY` | 10 | 最大对话历史 |
+
+## API 接口
+
+### 聊天接口
+
+```bash
+# 非流式
+curl -X POST http://localhost:8000/chat \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: zk_xxx" \
+  -d '{"session_id": "s1", "message": "你好"}'
+
+# 流式
+curl -X POST http://localhost:8000/chat/stream \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: zk_xxx" \
+  -d '{"session_id": "s1", "message": "你好"}'
+```
+
+### 文件上传
+
+```bash
+curl -X POST http://localhost:8000/upload \
+  -H "X-API-Key: zk_xxx" \
+  -F "file=@产品手册.docx"
+```
+
+### 商户管理
+
+```bash
+# 创建商户
+curl -X POST "http://localhost:8000/admin/merchants?name=商户A" \
+  -H "X-Admin-Key: admin123"
+
+# 列出商户
+curl http://localhost:8000/admin/merchants \
+  -H "X-Admin-Key: admin123"
+```
+
+### 评估接口
+
+```bash
+# 运行评估
+curl -X POST http://localhost:8000/admin/eval/run \
+  -H "X-Admin-Key: admin123"
+
+# 查看趋势
+curl http://localhost:8000/admin/eval/trends \
+  -H "X-Admin-Key: admin123"
+```
 
 ## 运行测试
 
@@ -50,190 +167,16 @@ streamlit run app.py
 pytest test_backend.py -v
 ```
 
-## API 接口
+## 嵌入式 Widget
 
-### POST /chat
+在任意 HTML 页面中引入：
 
-请求：
-```json
-{
-  "session_id": "session_123",
-  "message": "你好"
-}
+```html
+<script>window.AI_CHAT_API_URL = 'http://your-server:8000';</script>
+<script>window.AI_CHAT_API_KEY = 'zk_xxx';</script>
+<script src="http://your-server:8000/static/widget.js"></script>
 ```
 
-响应：
-```json
-{
-  "reply": "您好！很高兴为您服务！...",
-  "status": "normal",
-  "sentiment_label": "neutral",
-  "intent": "greeting"
-}
-```
+## License
 
-### POST /chat/stream
-
-SSE 流式响应，事件格式：
-```
-event: token
-data: 您
-
-event: token
-data: 好
-
-event: done
-data: {"reply": "您好！", "status": "normal", ...}
-```
-
-### POST /upload
-
-上传文件（multipart/form-data）：
-
-```bash
-curl -X POST http://localhost:8000/upload -F "file=@产品手册.txt"
-```
-
-响应：
-```json
-{
-  "status": "success",
-  "filename": "产品手册.txt",
-  "chunks": 12
-}
-```
-
-### GET /upload/list
-
-响应：
-```json
-{
-  "files": [
-    {"filename": "产品手册.txt", "upload_time": "2026-01-01T00:00:00", "chunks": 12}
-  ]
-}
-```
-
-### DELETE /upload/{filename}
-
-### GET /health
-
-## 项目结构
-
-```
-zolon/
-├── backend.py          # FastAPI 后端 + LangGraph 节点
-├── app.py              # Streamlit 前端
-├── test_backend.py     # 测试用例
-├── requirements.txt    # 依赖列表
-├── .env                # 环境变量
-├── Dockerfile          # Docker 镜像配置
-├── docker-compose.yml  # Docker Compose 配置
-├── chroma_db/          # ChromaDB 持久化存储
-├── uploads/            # 上传的文件
-├── sessions/           # 会话数据
-├── hf_cache/           # BGE 模型缓存
-└── README.md           # 项目说明
-```
-
-## Docker 部署
-
-### 前置条件
-
-- 安装 [Docker](https://docs.docker.com/get-docker/)
-- 安装 [Docker Compose](https://docs.docker.com/compose/install/)（可选）
-
-### 方式1: Docker Compose（推荐）
-
-```bash
-# 1. 创建环境变量文件
-cat > .env << EOF
-DEEPSEEK_API_KEY=sk-xxx
-HF_ENDPOINT=https://hf-mirror.com
-EOF
-
-# 2. 启动服务
-docker-compose up -d
-
-# 3. 查看日志
-docker-compose logs -f
-
-# 4. 停止服务
-docker-compose down
-
-# 5. 重启服务
-docker-compose restart
-
-# 6. 查看容器状态
-docker-compose ps
-```
-
-### 方式2: Docker
-
-```bash
-# 1. 构建镜像
-docker build -t ai-sales-agent .
-
-# 2. 运行容器
-docker run -d \
-  --name ai-sales-agent \
-  -p 8000:8000 \
-  -p 8501:8501 \
-  -v $(pwd)/chroma_db:/app/chroma_db \
-  -v $(pwd)/uploads:/app/uploads \
-  -v $(pwd)/sessions:/app/sessions \
-  -v $(pwd)/hf_cache:/app/hf_cache \
-  -e DEEPSEEK_API_KEY=sk-xxx \
-  -e HF_ENDPOINT=https://hf-mirror.com \
-  ai-sales-agent
-
-# 3. 查看日志
-docker logs -f ai-sales-agent
-
-# 4. 停止容器
-docker stop ai-sales-agent
-
-# 5. 删除容器
-docker rm ai-sales-agent
-```
-
-### 访问服务
-
-启动成功后：
-
-- **前端界面**: http://localhost:8501
-- **后端 API**: http://localhost:8000
-- **健康检查**: http://localhost:8000/health
-
-### 数据持久化
-
-以下目录会挂载到宿主机，重启后数据不丢失：
-
-| 目录 | 说明 |
-|------|------|
-| `chroma_db/` | ChromaDB 向量数据库 |
-| `uploads/` | 上传的知识文档 |
-| `sessions/` | 会话历史记录 |
-| `hf_cache/` | BGE 模型缓存（约183MB） |
-
-### 常见问题
-
-**Q: 首次启动很慢？**
-
-A: 首次启动需要下载 BGE 模型（约183MB），后续启动会从缓存加载。可配置 `HF_ENDPOINT=https://hf-mirror.com` 使用国内镜像加速。
-
-**Q: 如何更新代码？**
-
-A: 修改代码后重新构建镜像：
-```bash
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
-```
-
-**Q: 如何查看容器内日志？**
-
-A: 
-```bash
-docker-compose logs -f ai-sales-agent
-```
+MIT

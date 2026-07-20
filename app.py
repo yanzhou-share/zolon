@@ -1,5 +1,8 @@
 import json
 import os
+
+os.environ["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
+
 import streamlit as st
 import httpx
 import uuid
@@ -380,8 +383,45 @@ with tab_dashboard:
             if trends:
                 import pandas as pd
                 df = pd.DataFrame(trends)
-                if "faithfulness" in df.columns:
-                    st.line_chart(df.set_index("date")[["faithfulness", "hallucination"]])
+
+                # 核心指标概览
+                latest = df.iloc[-1] if len(df) > 0 else {}
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("忠实度", f"{latest.get('faithfulness', 0):.2f}")
+                with col2:
+                    st.metric("幻觉率", f"{latest.get('hallucination', 0):.2f}")
+                with col3:
+                    st.metric("召回率", f"{latest.get('recall_at_k', 0):.2f}")
+                with col4:
+                    st.metric("满意度", f"{latest.get('satisfaction', 0):.2f}")
+
+                # 图表分组展示
+                tab1, tab2, tab3, tab4 = st.tabs(["检索质量", "生成质量", "端到端质量", "性能"])
+
+                with tab1:
+                    retrieval_cols = ["recall_at_k", "precision_at_k", "mrr", "hit_rate"]
+                    available = [c for c in retrieval_cols if c in df.columns]
+                    if available:
+                        st.line_chart(df.set_index("date")[available])
+
+                with tab2:
+                    gen_cols = ["faithfulness", "answer_relevancy", "context_relevancy", "hallucination"]
+                    available = [c for c in gen_cols if c in df.columns]
+                    if available:
+                        st.line_chart(df.set_index("date")[available])
+
+                with tab3:
+                    e2e_cols = ["correctness", "response_quality", "satisfaction"]
+                    available = [c for c in e2e_cols if c in df.columns]
+                    if available:
+                        st.line_chart(df.set_index("date")[available])
+
+                with tab4:
+                    perf_cols = ["avg_latency_ms"]
+                    available = [c for c in perf_cols if c in df.columns]
+                    if available:
+                        st.line_chart(df.set_index("date")[available])
             else:
                 st.info("暂无评估数据，点击下方按钮运行评估")
     except Exception:

@@ -1,0 +1,114 @@
+[
+  {
+    "id": "P01",
+    "query": "MP12处理器是什么",
+    "hit": true,
+    "time_ms": 4693,
+    "knowledge_preview": "\\# Nova MP12 产品参数手册\n\\## 产品名称\nNova MP12 智能手机\n\\## 核心硬件\n\\### 处理器\nNova MP12 搭载高通骁龙8 Gen3处理器。\n处理器采用4nm制程工"
+  },
+  {
+    "id": "P02",
+    "query": "手机电池多大",
+    "hit": true,
+    "time_ms": 4159,
+    "knowledge_preview": "\\# Nova MP12 产品参数手册\n\\## 产品名称\nNova MP12 智能手机\n\\## 核心硬件\n\\### 处理器\nNova MP12 搭载高通骁龙8 Gen3处理器。\n处理器采用4nm制程工"
+  },
+  {
+    "id": "P03",
+    "query": "Nova MP12屏幕刷新率是多少",
+    "hit": true,
+    "time_ms": 5310,
+    "knowledge_preview": "\\# Nova MP12 产品参数手册\n\\## 产品名称\nNova MP12 智能手机\n\\## 核心硬件\n\\### 处理器\nNova MP12 搭载高通骁龙8 Gen3处理器。\n处理器采用4nm制程工"
+  },
+  {
+    "id": "P04",
+    "query": "手机支持什么网络",
+    "hit": true,
+    "time_ms": 4630,
+    "knowledge_preview": "\\# Nova MP12 产品参数手册\n\\## 产品名称\nNova MP12 智能手机\n\\## 核心硬件\n\\### 处理器\nNova MP12 搭载高通骁龙8 Gen3处理器。\n处理器采用4nm制程工"
+  },
+  {
+    "id": "F01",
+    "query": "MP12有哪些AI功能",
+    "hit": true,
+    "time_ms": 5338,
+    "knowledge_preview": "\\# Nova MP12 产品功能介绍\n\\## AI智能功能\nNova MP12 支持AI智能助手。\n主要能力：\n\\- AI图片生成\n\\- AI文本总结\n\\- AI会议记录\n\\- AI语音翻译\n\\##"
+  },
+  {
+    "id": "F02",
+    "query": "MP12玩游戏性能怎么样",
+    "hit": true,
+    "time_ms": 5252,
+    "knowledge_preview": "\\# Nova MP12 用户FAQ\n\\## Q:\nNova MP12适合玩游戏吗？\nA:\n适合。\n由于搭载骁龙8 Gen3处理器，\n并支持GPU Turbo技术，\n可以流畅运行大型手游。\n手机续航怎"
+  },
+  {
+    "id": "F03",
+    "query": "手机有哪些拍照功能",
+    "hit": true,
+    "time_ms": 4696,
+    "knowledge_preview": "\\# Nova MP12 产品功能介绍\n\\## AI智能功能\nNova MP12 支持AI智能助手。\n主要能力：\n\\- AI图片生成\n\\- AI文本总结\n\\- AI会议记录\n\\- AI语音翻译\n\\##"
+  },
+  {
+    "id": "S01",
+    "query": "手机保修多久",
+    "hit": true,
+    "time_ms": 4537,
+    "knowledge_preview": "\\# Nova MP12 售后服务政策\n\\## 保修政策\n整机提供两年官方质保。\n电池提供一年保修。\n\\## 换机政策\n购买7天内：\n如果出现非人为质量问题，\n支持无理由换机。\n\\## 维修服务\n官方"
+  },
+  {
+    "id": "S02",
+    "query": "电池坏了保修吗",
+    "hit": true,
+    "time_ms": 4730,
+    "knowledge_preview": "\\# Nova MP12 售后服务政策\n\\## 保修政策\n整机提供两年官方质保。\n电池提供一年保修。\n\\## 换机政策\n购买7天内：\n如果出现非人为质量问题，\n支持无理由换机。\n\\## 维修服务\n官方"
+  },
+  {
+    "id": "S03",
+    "query": "买7天可以换手机吗",
+    "hit": false,
+    "time_ms": 4568,
+    "knowledge_preview": "\\# Nova MP12 售后服务政策\n\\## 保修政策\n整机提供两年官方质保。\n电池提供一年保修。\n\\## 换机政策\n购买7天内：\n如果出现非人为质量问题，\n支持无理由换机。\n\\## 维修服务\n官方"
+  },
+  {
+    "id": "V01",
+    "query": "MP12多少钱",
+    "hit": true,
+    "time_ms": 4761,
+    "knowledge_preview": "\\# Nova MP12 产品版本价格\n\\## 标准版\n配置：\n12GB RAM + 256GB存储\n售价：\n3999元\n\\## Pro版\n16GB RAM + 512GB存储\n4999元\n\\## 颜"
+  },
+  {
+    "id": "V02",
+    "query": "Pro版本配置是什么",
+    "hit": true,
+    "time_ms": 5182,
+    "knowledge_preview": "\\# Nova MP12 产品版本价格\n\\## 标准版\n配置：\n12GB RAM + 256GB存储\n售价：\n3999元\n\\## Pro版\n16GB RAM + 512GB存储\n4999元\n\\## 颜"
+  },
+  {
+    "id": "Q01",
+    "query": "MP12适合打游戏吗",
+    "hit": true,
+    "time_ms": 5516,
+    "knowledge_preview": "\\# Nova MP12 用户FAQ\n\\## Q:\nNova MP12适合玩游戏吗？\nA:\n适合。\n由于搭载骁龙8 Gen3处理器，\n并支持GPU Turbo技术，\n可以流畅运行大型手游。\n手机续航怎"
+  },
+  {
+    "id": "Q02",
+    "query": "支持无线充电吗",
+    "hit": true,
+    "time_ms": 4774,
+    "knowledge_preview": "\\# Nova MP12 用户FAQ\n\\## Q:\nNova MP12适合玩游戏吗？\nA:\n适合。\n由于搭载骁龙8 Gen3处理器，\n并支持GPU Turbo技术，\n可以流畅运行大型手游。\n手机续航怎"
+  },
+  {
+    "id": "Q03",
+    "query": "手机防水吗",
+    "hit": true,
+    "time_ms": 4752,
+    "knowledge_preview": "\\# Nova MP12 用户FAQ\n\\## Q:\nNova MP12适合玩游戏吗？\nA:\n适合。\n由于搭载骁龙8 Gen3处理器，\n并支持GPU Turbo技术，\n可以流畅运行大型手游。\n手机续航怎"
+  },
+  {
+    "id": "Q04",
+    "query": "普通用户买哪个版本",
+    "hit": true,
+    "time_ms": 4804,
+    "knowledge_preview": "\\# Nova MP12 用户FAQ\n\\## Q:\nNova MP12适合玩游戏吗？\nA:\n适合。\n由于搭载骁龙8 Gen3处理器，\n并支持GPU Turbo技术，\n可以流畅运行大型手游。\n手机续航怎"
+  }
+]

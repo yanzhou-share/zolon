@@ -43,6 +43,8 @@ class ChunkConfig:
     """文本分块配置"""
     CHUNK_SIZE: int = int(os.getenv("CHUNK_SIZE", "500"))
     CHUNK_OVERLAP: int = int(os.getenv("CHUNK_OVERLAP", "50"))
+    SEMANTIC_THRESHOLD: float = float(os.getenv("SEMANTIC_THRESHOLD", "0.5"))
+    USE_SEMANTIC_CHUNK: bool = os.getenv("USE_SEMANTIC_CHUNK", "false").lower() == "true"
 
 
 class MerchantConfig:
@@ -57,6 +59,9 @@ class ChatConfig:
     CONTEXT_MERGE_WINDOW: float = float(os.getenv("CONTEXT_MERGE_WINDOW", "5.0"))
     GREETING_TEMPLATE: str = "我是您的AI智能助手{assistant_name}，随时为您服务！"
     CLOSING: str = "请问还有什么可以帮助您的吗？"
+    MODEL_MAX_CONTEXT: int = int(os.getenv("MODEL_MAX_CONTEXT", "64000"))
+    SAFETY_MARGIN: float = float(os.getenv("SAFETY_MARGIN", "0.7"))
+    RESPONSE_TOKEN_BUDGET: int = int(os.getenv("RESPONSE_TOKEN_BUDGET", "800"))
 
 
 class SentimentConfig:
@@ -66,7 +71,7 @@ class SentimentConfig:
         "脑残", "煞笔", "混蛋", "王八蛋", "fuck", "shit", "stupid",
         "idiot", "damn"
     ]
-    ANGRY_KEYWORDS: list = ["生气", "愤怒", "投诉", "差评", "垃圾", "退货", "退款", "骗子", "骗人"]
+    ANGRY_KEYWORDS: list = ["生气", "愤怒", "投诉", "差评", "垃圾", "退款", "骗子", "骗人"]
 
 
 class EvalConfig:

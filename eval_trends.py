@@ -38,6 +38,15 @@ def init_eval_tables():
         avg_latency_ms REAL DEFAULT 0,
         total_requests INTEGER DEFAULT 0,
         total_tokens INTEGER DEFAULT 0,
+        recall_at_k REAL DEFAULT 0,
+        precision_at_k REAL DEFAULT 0,
+        mrr REAL DEFAULT 0,
+        hit_rate REAL DEFAULT 0,
+        answer_relevancy REAL DEFAULT 0,
+        context_relevancy REAL DEFAULT 0,
+        correctness REAL DEFAULT 0,
+        response_quality REAL DEFAULT 0,
+        satisfaction REAL DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )""")
 
@@ -79,6 +88,15 @@ def record_daily_metrics(
     total_requests: int,
     total_tokens: int,
     api_key: str = None,
+    recall_at_k: float = 0,
+    precision_at_k: float = 0,
+    mrr: float = 0,
+    hit_rate: float = 0,
+    answer_relevancy: float = 0,
+    context_relevancy: float = 0,
+    correctness: float = 0,
+    response_quality: float = 0,
+    satisfaction: float = 0,
 ):
     """
     记录每日指标
@@ -91,15 +109,28 @@ def record_daily_metrics(
         total_requests: 总请求数
         total_tokens: 总 Token 数
         api_key: 商户 API Key（可选，用于商户级别统计）
+        recall_at_k: 召回率
+        precision_at_k: 精确率
+        mrr: 平均倒数排名
+        hit_rate: 命中率
+        answer_relevancy: 回答相关性
+        context_relevancy: 上下文相关性
+        correctness: 正确性
+        response_quality: 回答质量
+        satisfaction: 满意度
     """
     conn = get_conn()
     c = conn.cursor()
     today = datetime.now().strftime("%Y-%m-%d")
 
     c.execute("""INSERT INTO daily_metrics
-        (date, api_key, faithfulness, hallucination, relevancy, avg_latency_ms, total_requests, total_tokens)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-        (today, api_key, faithfulness, hallucination, relevancy, avg_latency_ms, total_requests, total_tokens)
+        (date, api_key, faithfulness, hallucination, relevancy, avg_latency_ms, total_requests, total_tokens,
+         recall_at_k, precision_at_k, mrr, hit_rate, answer_relevancy, context_relevancy,
+         correctness, response_quality, satisfaction)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (today, api_key, faithfulness, hallucination, relevancy, avg_latency_ms, total_requests, total_tokens,
+         recall_at_k, precision_at_k, mrr, hit_rate, answer_relevancy, context_relevancy,
+         correctness, response_quality, satisfaction)
     )
     conn.commit()
     conn.close()
@@ -121,13 +152,20 @@ def get_trend(days: int = 30, api_key: str = None) -> list:
     since = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
 
     if api_key:
-        c.execute("""SELECT date, faithfulness, hallucination, relevancy, avg_latency_ms, total_requests, total_tokens
+        c.execute("""SELECT date, faithfulness, hallucination, relevancy, avg_latency_ms, total_requests, total_tokens,
+            recall_at_k, precision_at_k, mrr, hit_rate, answer_relevancy, context_relevancy,
+            correctness, response_quality, satisfaction
             FROM daily_metrics WHERE date >= ? AND api_key = ? ORDER BY date""",
             (since, api_key))
     else:
         c.execute("""SELECT date, AVG(faithfulness) as faithfulness, AVG(hallucination) as hallucination,
             AVG(relevancy) as relevancy, AVG(avg_latency_ms) as avg_latency_ms,
-            SUM(total_requests) as total_requests, SUM(total_tokens) as total_tokens
+            SUM(total_requests) as total_requests, SUM(total_tokens) as total_tokens,
+            AVG(recall_at_k) as recall_at_k, AVG(precision_at_k) as precision_at_k,
+            AVG(mrr) as mrr, AVG(hit_rate) as hit_rate,
+            AVG(answer_relevancy) as answer_relevancy, AVG(context_relevancy) as context_relevancy,
+            AVG(correctness) as correctness, AVG(response_quality) as response_quality,
+            AVG(satisfaction) as satisfaction
             FROM daily_metrics WHERE date >= ? GROUP BY date ORDER BY date""",
             (since,))
 

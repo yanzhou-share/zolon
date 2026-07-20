@@ -1,13 +1,28 @@
 {
-  "description": "基于上传文档生成的评估测试集",
-  "version": "3.0",
+  "description": "基于多文档知识库的评估测试集（含检索评估）",
+  "version": "7.0",
   "generated_from": [
-    "智能手机",
-    "笔记本电脑",
-    "无线耳机",
-    "智能手表",
-    "平板电脑"
+    "test_semantic_chunks.txt",
+    "rag_doc/notice.md",
+    "rag_doc/prodesc.md",
+    "rag_doc/slution.md",
+    "rag_doc/yunwei.md",
+    "rag_doc/FAQ.md"
   ],
+  "chunk_mapping": {
+    "test_semantic_chunks.txt_v8_chunk_0": "产品概述、摄像头、电池、网络、售后服务（前半部分）",
+    "test_semantic_chunks.txt_v8_chunk_1": "售后服务（后半部分）、价格、竞品、客户评价",
+    "notice.md_v1_chunk_0": "设备安装步骤、网络配置、设备配对",
+    "notice.md_v1_chunk_1": "无线打印、高清扫描、文档归档、使用注意事项",
+    "prodesc.md_v1_chunk_0": "产品概述、核心功能特点",
+    "prodesc.md_v1_chunk_1": "多人协同、智能归档、低耗运行、参数、适用场景",
+    "slution.md_v1_chunk_0": "行业痛点分析",
+    "slution.md_v1_chunk_1": "方案核心优势、落地收益、配套服务",
+    "yunwei.md_v1_chunk_0": "日常维护规范",
+    "yunwei.md_v1_chunk_1": "常见故障排查、保修政策",
+    "FAQ.md_v1_chunk_0": "基础使用问题（免驱连接、扫描设置、归档检索）",
+    "FAQ.md_v1_chunk_1": "故障与运维问题（硒鼓异常、卡纸、网络连接）"
+  },
   "test_cases": [
     {
       "id": "TC001",
@@ -16,208 +31,283 @@
       "intent": "greeting",
       "category": "greeting"
     },
+
     {
       "id": "TC002",
-      "query": "XPhone 15 Pro Max 的电池能用多久？",
-      "expected_answer": "电池续航约28小时视频播放或95小时音频播放",
+      "query": "MP12是什么产品？",
+      "expected_answer": "MP12是一款高性能企业级智能平板，采用最新处理器架构，配备12.2英寸高清显示屏",
+      "relevant_ids": ["test_semantic_chunks.txt_v8_chunk_0"],
       "intent": "feature_inquiry",
-      "category": "smartphone"
+      "category": "mp12_overview"
     },
     {
       "id": "TC003",
-      "query": "XPhone 15 Lite 适合玩游戏吗？",
-      "expected_answer": "A18降频版芯片性能接近A17 Pro，运行《原神》等高负载游戏可稳定60fps",
+      "query": "MP12的摄像头像素是多少？",
+      "expected_answer": "后置1300万像素，前置800万像素",
+      "relevant_ids": ["test_semantic_chunks.txt_v8_chunk_0"],
       "intent": "feature_inquiry",
-      "category": "smartphone"
+      "category": "mp12_camera"
     },
     {
       "id": "TC004",
-      "query": "XPhone 15 Pro Max 多少钱？",
-      "expected_answer": "8,999元",
-      "intent": "pricing_query",
-      "category": "smartphone"
+      "query": "MP12电池能用多久？",
+      "expected_answer": "正常使用续航可达12小时以上",
+      "relevant_ids": ["test_semantic_chunks.txt_v8_chunk_0"],
+      "intent": "feature_inquiry",
+      "category": "mp12_battery"
     },
     {
       "id": "TC005",
-      "query": "不同机型的充电速度差异有多大？",
-      "expected_answer": "Pro Max支持40W有线快充，Pro支持35W，15标准版支持25W，Lite支持25W",
+      "query": "MP12支持5G吗？",
+      "expected_answer": "支持5G蜂窝网络版本",
+      "relevant_ids": ["test_semantic_chunks.txt_v8_chunk_0"],
       "intent": "feature_inquiry",
-      "category": "smartphone"
+      "category": "mp12_network"
     },
     {
       "id": "TC006",
-      "query": "XPhone 15 Pro Max 有什么颜色？",
-      "expected_answer": "原色钛金属、蓝色钛金属、白色钛金属、黑色钛金属",
-      "intent": "feature_inquiry",
-      "category": "smartphone"
+      "query": "MP12多少钱？",
+      "expected_answer": "标准版5999元，高配版9999元",
+      "relevant_ids": ["test_semantic_chunks.txt_v8_chunk_1"],
+      "intent": "pricing_query",
+      "category": "mp12_price"
     },
     {
       "id": "TC007",
-      "query": "折叠屏手机耐用吗？",
-      "expected_answer": "铰链经过50万次折叠测试，相当于日常使用6年以上",
-      "intent": "feature_inquiry",
-      "category": "smartphone"
+      "query": "MP12保修多久？",
+      "expected_answer": "3年质保服务，全国联保",
+      "relevant_ids": ["test_semantic_chunks.txt_v8_chunk_0"],
+      "intent": "support",
+      "category": "mp12_service"
     },
     {
       "id": "TC008",
-      "query": "系统更新支持多长时间？",
-      "expected_answer": "旗舰系列支持5年系统更新+7年安全补丁",
-      "intent": "support",
-      "category": "smartphone"
+      "query": "用户对MP12评价怎么样？",
+      "expected_answer": "95%的用户表示满意，好评集中在屏幕显示效果和电池续航",
+      "relevant_ids": ["test_semantic_chunks.txt_v8_chunk_1"],
+      "intent": "feature_inquiry",
+      "category": "mp12_review"
     },
+
     {
       "id": "TC009",
-      "query": "各机型拍照有什么区别？",
-      "expected_answer": "Pro Max独有5倍长焦和LiDAR，Pro有3倍长焦",
-      "intent": "feature_inquiry",
-      "category": "smartphone"
+      "query": "智能办公一体机怎么安装？",
+      "expected_answer": "开箱检查、放置设备、安装硒鼓、接通电源、网络配置、设备配对",
+      "relevant_ids": ["notice.md_v1_chunk_0"],
+      "intent": "support",
+      "category": "notice_install"
     },
     {
       "id": "TC010",
-      "query": "需要贴膜吗？",
-      "expected_answer": "日常使用仍建议贴膜防刮",
-      "intent": "support",
-      "category": "smartphone"
+      "query": "智能办公一体机怎么无线打印？",
+      "expected_answer": "电脑端选择设备型号打印，手机端通过企业微信、钉钉或小程序上传文档打印",
+      "relevant_ids": ["notice.md_v1_chunk_1"],
+      "intent": "feature_inquiry",
+      "category": "notice_print"
     },
     {
       "id": "TC011",
-      "query": "XBook Pro 16 的屏幕怎么样？",
-      "expected_answer": "16.2英寸 Liquid Retina XDR 显示屏",
+      "query": "智能办公一体机怎么扫描文档？",
+      "expected_answer": "将文档放置在扫描盖板下，触摸屏点击扫描功能，选择格式和分辨率，可开启AI优化",
+      "relevant_ids": ["notice.md_v1_chunk_1"],
       "intent": "feature_inquiry",
-      "category": "laptop"
+      "category": "notice_scan"
     },
     {
       "id": "TC012",
-      "query": "XBook Air 续航多久？",
-      "expected_answer": "最长可达18小时",
+      "query": "智能办公一体机文档怎么归档？",
+      "expected_answer": "设备默认自动归档，按日期和文件类型分类存储，支持关键词检索",
+      "relevant_ids": ["notice.md_v1_chunk_1"],
       "intent": "feature_inquiry",
-      "category": "laptop"
+      "category": "notice_archive"
     },
     {
       "id": "TC013",
-      "query": "XBook Pro 16 多少钱？",
-      "expected_answer": "14,999元起",
-      "intent": "pricing_query",
-      "category": "laptop"
+      "query": "智能办公一体机使用时要注意什么？",
+      "expected_answer": "使用原装硒鼓、禁止强行打开机盖、长期不使用需关闭电源、清洁用干燥软布",
+      "relevant_ids": ["notice.md_v1_chunk_1"],
+      "intent": "support",
+      "category": "notice_precaution"
     },
+
     {
       "id": "TC014",
-      "query": "笔记本可以外接显示器吗？",
-      "expected_answer": "支持Thunderbolt 4，可外接多台显示器",
+      "query": "智能办公一体机是什么产品？",
+      "expected_answer": "面向中小企业、政企办公场景的一体化智能办公设备，集打印、复印、扫描、联网、归档、AI纠错于一体",
+      "relevant_ids": ["prodesc.md_v1_chunk_0"],
       "intent": "feature_inquiry",
-      "category": "laptop"
+      "category": "prodesc_overview"
     },
     {
       "id": "TC015",
-      "query": "XPods Pro 2 降噪效果怎么样？",
-      "expected_answer": "支持主动降噪，降噪深度达48dB",
+      "query": "智能办公一体机打印速度多快？",
+      "expected_answer": "黑白32页/分钟，彩色28页/分钟，扫描45页/分钟",
+      "relevant_ids": ["prodesc.md_v1_chunk_0"],
       "intent": "feature_inquiry",
-      "category": "earbuds"
+      "category": "prodesc_speed"
     },
     {
       "id": "TC016",
-      "query": "XPods Pro 2 续航多久？",
-      "expected_answer": "单次6小时，配合充电盒30小时",
+      "query": "智能办公一体机有AI功能吗？",
+      "expected_answer": "内置AI排版算法，可自动修正歪斜、去除底色、修复模糊、裁剪边框，支持多格式互转",
+      "relevant_ids": ["prodesc.md_v1_chunk_0"],
       "intent": "feature_inquiry",
-      "category": "earbuds"
+      "category": "prodesc_ai"
     },
     {
       "id": "TC017",
-      "query": "XPods Pro 2 防水吗？",
-      "expected_answer": "IP54防水防尘",
+      "query": "智能办公一体机支持多少人同时使用？",
+      "expected_answer": "最多支持20台设备同时连接使用",
+      "relevant_ids": ["prodesc.md_v1_chunk_1"],
       "intent": "feature_inquiry",
-      "category": "earbuds"
+      "category": "prodesc_multiuser"
     },
     {
       "id": "TC018",
-      "query": "Watch Ultra 3 有什么功能？",
-      "expected_answer": "支持GPS、心率监测、血氧检测、睡眠追踪",
-      "intent": "feature_inquiry",
-      "category": "watch"
+      "query": "智能办公一体机打印成本多少？",
+      "expected_answer": "单页打印成本低至0.03元",
+      "relevant_ids": ["prodesc.md_v1_chunk_1"],
+      "intent": "pricing_query",
+      "category": "prodesc_cost"
     },
     {
       "id": "TC019",
-      "query": "Watch Ultra 3 续航多久？",
-      "expected_answer": "正常使用约3天",
+      "query": "智能办公一体机参数是什么？",
+      "expected_answer": "尺寸420mm×380mm×360mm，重量12.5kg，A4幅面，1200×1200dpi",
+      "relevant_ids": ["prodesc.md_v1_chunk_1"],
       "intent": "feature_inquiry",
-      "category": "watch"
+      "category": "prodesc_spec"
     },
     {
       "id": "TC020",
-      "query": "Watch Ultra 3 防水吗？",
-      "expected_answer": "100米防水",
+      "query": "智能办公一体机适合什么场景？",
+      "expected_answer": "中小企业办公、政务窗口、教育机构、连锁门店、项目部等场景",
+      "relevant_ids": ["prodesc.md_v1_chunk_1"],
       "intent": "feature_inquiry",
-      "category": "watch"
+      "category": "prodesc_scenario"
     },
+
     {
       "id": "TC021",
-      "query": "XPad Pro 12.9 有什么功能？",
-      "expected_answer": "支持XPen手写笔，120Hz ProMotion",
+      "query": "中小企业办公有什么痛点？",
+      "expected_answer": "设备零散、效率低下、管理混乱、成本偏高四大核心问题",
+      "relevant_ids": ["slution.md_v1_chunk_0"],
       "intent": "feature_inquiry",
-      "category": "tablet"
+      "category": "slution_pain"
     },
     {
       "id": "TC022",
-      "query": "XPad Pro 12.9 多少钱？",
-      "expected_answer": "8,999元起",
-      "intent": "pricing_query",
-      "category": "tablet"
+      "query": "智能办公解决方案能节省多少空间？",
+      "expected_answer": "一台设备替代多台，节省70%办公设备占用空间",
+      "relevant_ids": ["slution.md_v1_chunk_1"],
+      "intent": "feature_inquiry",
+      "category": "slution_space"
     },
     {
       "id": "TC023",
-      "query": "XPad 可以插卡吗？",
-      "expected_answer": "支持Wi-Fi版和5G版",
+      "query": "智能办公解决方案能提升多少效率？",
+      "expected_answer": "AI自动优化文档、自动分类归档，提升60%文档处理效率",
+      "relevant_ids": ["slution.md_v1_chunk_1"],
       "intent": "feature_inquiry",
-      "category": "tablet"
+      "category": "slution_efficiency"
     },
     {
       "id": "TC024",
-      "query": "保修期多长？",
-      "expected_answer": "主机保修1年，主要部件延保至2年",
-      "intent": "support",
-      "category": "service"
+      "query": "智能办公解决方案能节省多少成本？",
+      "expected_answer": "每年可节省30%以上办公耗材及运维成本",
+      "relevant_ids": ["slution.md_v1_chunk_1"],
+      "intent": "pricing_query",
+      "category": "slution_cost"
     },
     {
       "id": "TC025",
-      "query": "怎么退货？",
-      "expected_answer": "签收后14天内无理由退换",
+      "query": "智能办公解决方案配套什么服务？",
+      "expected_answer": "免费上门安装调试、员工操作培训、1对1技术指导、全年售后运维、系统免费升级",
+      "relevant_ids": ["slution.md_v1_chunk_1"],
       "intent": "support",
-      "category": "service"
+      "category": "slution_service"
     },
+
     {
       "id": "TC026",
-      "query": "客服电话是多少？",
-      "expected_answer": "400-888-8888（7×24小时）",
+      "query": "智能办公一体机日常怎么维护？",
+      "expected_answer": "每日清理纸屑、每周擦拭机身、每月检查硒鼓和清理灰尘",
+      "relevant_ids": ["yunwei.md_v1_chunk_0"],
       "intent": "support",
-      "category": "service"
+      "category": "yunwei_maintenance"
     },
     {
       "id": "TC027",
-      "query": "怎么预约维修？",
-      "expected_answer": "可通过官方网站或APP预约",
+      "query": "智能办公一体机卡纸了怎么办？",
+      "expected_answer": "关闭电源，轻轻抽出卡纸，更换平整纸张，擦拭进纸滚轮",
+      "relevant_ids": ["yunwei.md_v1_chunk_1"],
       "intent": "support",
-      "category": "service"
+      "category": "yunwei_paperjam"
     },
     {
       "id": "TC028",
-      "query": "XPhone 15 Pro 和 Pro Max 有什么区别？",
-      "expected_answer": "Pro Max屏幕更大，有5倍长焦",
-      "intent": "comparison",
-      "category": "smartphone"
+      "query": "智能办公一体机打印模糊怎么办？",
+      "expected_answer": "更换原装硒鼓，启动自动清洁程序，更换干燥打印纸",
+      "relevant_ids": ["yunwei.md_v1_chunk_1"],
+      "intent": "support",
+      "category": "yunwei_blur"
     },
     {
       "id": "TC029",
-      "query": "XBook Pro 和 Air 哪个好？",
-      "expected_answer": "Pro性能更强，Air更轻薄",
-      "intent": "comparison",
-      "category": "laptop"
+      "query": "智能办公一体机无法连接WiFi怎么办？",
+      "expected_answer": "统一连接同一WiFi，重启设备及路由器，恢复网络出厂设置",
+      "relevant_ids": ["yunwei.md_v1_chunk_1"],
+      "intent": "support",
+      "category": "yunwei_wifi"
     },
     {
       "id": "TC030",
-      "query": "XPad 和 iPad 哪个好？",
-      "expected_answer": "各有优势，XPad支持XPen手写笔",
-      "intent": "comparison",
-      "category": "tablet"
+      "query": "智能办公一体机保修多久？",
+      "expected_answer": "整机1年免费保修，核心芯片、电机、主板2年质保",
+      "relevant_ids": ["yunwei.md_v1_chunk_1"],
+      "intent": "support",
+      "category": "yunwei_warranty"
+    },
+    {
+      "id": "TC031",
+      "query": "智能办公一体机开不了机怎么办？",
+      "expected_answer": "重新插拔电源线，更换可用插座，确认开机键按下",
+      "relevant_ids": ["yunwei.md_v1_chunk_1"],
+      "intent": "support",
+      "category": "yunwei_power"
+    },
+
+    {
+      "id": "TC032",
+      "query": "智能办公一体机需要下载驱动吗？",
+      "expected_answer": "无需下载驱动，设备支持免驱连接",
+      "relevant_ids": ["FAQ.md_v1_chunk_0"],
+      "intent": "support",
+      "category": "faq_driver"
+    },
+    {
+      "id": "TC033",
+      "query": "智能办公一体机硒鼓异常怎么办？",
+      "expected_answer": "关闭电源，取出硒鼓重新安装，确认卡扣锁紧；若仍异常需更换原装硒鼓",
+      "relevant_ids": ["FAQ.md_v1_chunk_1"],
+      "intent": "support",
+      "category": "faq_toner"
+    },
+    {
+      "id": "TC034",
+      "query": "智能办公一体机扫描怎么设置？",
+      "expected_answer": "在扫描设置中可调整分辨率、色彩模式、文件格式等参数",
+      "relevant_ids": ["FAQ.md_v1_chunk_0"],
+      "intent": "feature_inquiry",
+      "category": "faq_scan"
+    },
+    {
+      "id": "TC035",
+      "query": "智能办公一体机怎么检索历史文档？",
+      "expected_answer": "在触摸屏或小程序端输入关键词即可检索历史文档",
+      "relevant_ids": ["FAQ.md_v1_chunk_0"],
+      "intent": "feature_inquiry",
+      "category": "faq_search"
     }
   ]
 }

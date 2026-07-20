@@ -38,6 +38,19 @@
       ],
       "rate_limit": 100,
       "daily_limit": 5000
+    },
+    "zk_dftest12345": {
+      "name": "测试chroma",
+      "assistant_name": "小测",
+      "status": "active",
+      "created_at": "2026-06-23T14:24:12.303792",
+      "allowed_origins": [
+        "http://localhost:8501",
+        "http://localhost:8000",
+        "http://localhost:8501"
+      ],
+      "rate_limit": 100,
+      "daily_limit": 5000
     }
   }
 }

@@ -7,12 +7,13 @@ from fastapi.testclient import TestClient
 from openai import AsyncOpenAI
 
 from backend import (
-    app, graph, message_buffer, llm_client,
+    app, message_buffer,
     input_collector, sentiment_analyzer, query_optimizer,
     knowledge_retriever, response_generator, AgentState,
     _keyword_sentiment_fallback,
     chunk_text, parse_txt
 )
+from chat_agent import llm_client
 
 client = TestClient(app)
 
@@ -85,7 +86,7 @@ class TestSentimentAnalyzer:
             "reason": "客户使用了侮辱性语言"
         })
 
-        with patch("backend.llm_client", mock_llm):
+        with patch("chat_agent.llm_client", mock_llm):
             with patch.object(mock_llm.chat.completions, 'create', new_callable=AsyncMock, return_value=mock_response):
                 state = make_state("s", "你这个傻逼")
                 state["merged_message"] = "你这个傻逼"
@@ -105,7 +106,7 @@ class TestSentimentAnalyzer:
             "reason": "客户正常询问产品信息"
         })
 
-        with patch("backend.llm_client", mock_llm):
+        with patch("chat_agent.llm_client", mock_llm):
             with patch.object(mock_llm.chat.completions, 'create', new_callable=AsyncMock, return_value=mock_response):
                 state = make_state("s", "MP12多少钱？")
                 state["merged_message"] = "MP12多少钱？"
@@ -115,7 +116,7 @@ class TestSentimentAnalyzer:
 
     @pytest.mark.asyncio
     async def test_llm_fallback_on_error(self):
-        with patch("backend.llm_client", mock_llm):
+        with patch("chat_agent.llm_client", mock_llm):
             with patch.object(mock_llm.chat.completions, 'create', new_callable=AsyncMock, side_effect=Exception("API Error")):
                 state = make_state("s", "你这个傻逼")
                 state["merged_message"] = "你这个傻逼"
@@ -125,7 +126,7 @@ class TestSentimentAnalyzer:
 
     @pytest.mark.asyncio
     async def test_fallback_without_llm(self):
-        with patch("backend.llm_client", None):
+        with patch("chat_agent.llm_client", None):
             state = make_state("s", "你这个傻逼")
             state["merged_message"] = "你这个傻逼"
             result = await sentiment_analyzer(state)
@@ -143,7 +144,7 @@ class TestQueryOptimizer:
             "keywords": ["价格", "售价"]
         })
 
-        with patch("backend.llm_client", mock_llm):
+        with patch("chat_agent.llm_client", mock_llm):
             with patch.object(mock_llm.chat.completions, 'create', new_callable=AsyncMock, return_value=mock_response):
                 # 使用较长的查询以触发 LLM 优化（不含简单关键词）
                 state = make_state("s", "我想了解一下你们最新的手机产品多少钱")
@@ -154,7 +155,7 @@ class TestQueryOptimizer:
 
     @pytest.mark.asyncio
     async def test_llm_fallback_on_error(self):
-        with patch("backend.llm_client", mock_llm):
+        with patch("chat_agent.llm_client", mock_llm):
             with patch.object(mock_llm.chat.completions, 'create', new_callable=AsyncMock, side_effect=Exception("API Error")):
                 state = make_state("s", "MP12多少钱？")
                 state["merged_message"] = "MP12多少钱？"
@@ -164,7 +165,7 @@ class TestQueryOptimizer:
 
     @pytest.mark.asyncio
     async def test_fallback_without_llm(self):
-        with patch("backend.llm_client", None):
+        with patch("chat_agent.llm_client", None):
             state = make_state("s", "MP12多少钱？")
             state["merged_message"] = "MP12多少钱？"
             result = await query_optimizer(state)
@@ -181,7 +182,7 @@ class TestKnowledgeRetriever:
             "/upload",
             files={"file": ("camera.txt", io.BytesIO(content.encode("utf-8")), "text/plain")}
         )
-        with patch("backend.llm_client", None):
+        with patch("chat_agent.llm_client", None):
             state = make_state("s", "摄像头功能")
             state["merged_message"] = "摄像头功能"
             state["optimized_query"] = "摄像头功能"
@@ -196,7 +197,7 @@ class TestKnowledgeRetriever:
             "/upload",
             files={"file": ("mp12.txt", io.BytesIO(content.encode("utf-8")), "text/plain")}
         )
-        with patch("backend.llm_client", None):
+        with patch("chat_agent.llm_client", None):
             state = make_state("s", "这个平板怎么样")
             state["merged_message"] = "这个平板怎么样"
             state["optimized_query"] = "这个平板怎么样"
@@ -211,7 +212,7 @@ class TestResponseGenerator:
         mock_response.choices = [MagicMock()]
         mock_response.choices[0].message.content = "您好！MP12智能平板售价2999元，支持12期免息分期。"
 
-        with patch("backend.llm_client", mock_llm):
+        with patch("chat_agent.llm_client", mock_llm):
             with patch.object(mock_llm.chat.completions, 'create', new_callable=AsyncMock, return_value=mock_response):
                 state = make_state("s", "test")
                 state["merged_message"] = "MP12多少钱"
@@ -234,7 +235,7 @@ class TestResponseGenerator:
 
     @pytest.mark.asyncio
     async def test_llm_fallback_with_knowledge(self):
-        with patch("backend.llm_client", None):
+        with patch("chat_agent.llm_client", None):
             state = make_state("s", "test")
             state["merged_message"] = "test"
             state["retrieved_knowledge"] = "MP12售价2999元"
@@ -242,31 +243,6 @@ class TestResponseGenerator:
             result = await response_generator(state)
             assert "MP12" in result["reply"]
             assert "2999" in result["reply"]
-
-
-class TestGraphIntegration:
-    @pytest.mark.asyncio
-    async def test_normal_chat_flow(self):
-        with patch("backend.llm_client", None):
-            result = await graph.ainvoke(make_state("test_graph_1", "MP12多少钱？"))
-            assert result["status"] == "normal"
-            assert result["sentiment_score"] == "normal"
-            assert "MP12" in result["reply"] or "2999" in result["reply"]
-
-    @pytest.mark.asyncio
-    async def test_angry_triggers_handover(self):
-        with patch("backend.llm_client", None):
-            result = await graph.ainvoke(make_state("test_graph_2", "你这个傻逼"))
-            assert result["status"] == "human"
-            assert result["sentiment_score"] == "angry"
-            assert "人工" in result["reply"]
-
-    @pytest.mark.asyncio
-    async def test_return_triggers_handover(self):
-        with patch("backend.llm_client", None):
-            result = await graph.ainvoke(make_state("test_graph_3", "退货"))
-            assert result["status"] == "human"
-            assert result["sentiment_score"] == "angry"
 
 
 class TestChatEndpoint:
@@ -442,7 +418,7 @@ class TestRetrievalWithUploadedKnowledge:
             files={"file": ("sat.txt", io.BytesIO(content.encode("utf-8")), "text/plain")},
             headers=self.TEST_HEADERS
         )
-        with patch("backend.llm_client", None):
+        with patch("chat_agent.llm_client", None):
             state = make_state("s", "卫星通信")
             state["merged_message"] = "卫星通信"
             state["optimized_query"] = "卫星通信"

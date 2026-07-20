@@ -137,19 +137,26 @@ async def batch_evaluate(
         context = tc.get("context", "")
 
         # 如果没有 context，从知识库查询
+        retrieved_ids = tc.get("retrieved_ids", [])
+        retrieved_distances = tc.get("retrieved_distances", [])
         if not context and knowledge_collection and knowledge_collection.count() > 0:
             try:
-                results = knowledge_collection.query(query_texts=[query], n_results=3)
+                results = knowledge_collection.query(
+                    query_texts=[query], n_results=k,
+                    where={"status": "active"} if knowledge_collection.count() > 0 else None
+                )
                 if results and results["documents"] and results["documents"][0]:
                     context = "\n".join(results["documents"][0])
+                    retrieved_ids = results.get("ids", [[]])[0] if results.get("ids") else []
+                    retrieved_distances = results.get("distances", [[]])[0] if results.get("distances") else []
             except Exception as e:
                 logger.warning(f"Knowledge query failed for eval: {e}")
 
         retrieval_metrics = None
-        if tc.get("retrieved_ids") and tc.get("relevant_ids"):
+        if tc.get("relevant_ids") and retrieved_ids:
             rm = evaluate_retrieval_single(
-                retrieved_ids=tc["retrieved_ids"],
-                retrieved_distances=tc.get("retrieved_distances", []),
+                retrieved_ids=retrieved_ids,
+                retrieved_distances=retrieved_distances,
                 relevant_ids=set(tc["relevant_ids"]),
                 k=k,
             )

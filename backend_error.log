@@ -1,0 +1,31 @@
+INFO:     Started server process [35940]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:chat_agent:Loading embedding model: BAAI/bge-small-zh...
+INFO:sentence_transformers.base.model:No device provided, using cpu
+INFO:sentence_transformers.base.model:Loading SentenceTransformer model from BAAI/bge-small-zh.
+'EOF occurred in violation of protocol (_ssl.c:997)' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+WARNING:huggingface_hub.utils._http:'EOF occurred in violation of protocol (_ssl.c:997)' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-small-zh/resolve/main/adapter_config.json
+Retrying in 1s [Retry 1/5].
+WARNING:huggingface_hub.utils._http:Retrying in 1s [Retry 1/5].
+WARNING:chat_agent:Failed to load BGE model: Cannot send a request, as the client has been closed.
+INFO:__main__:Uploaded 'test_upload.txt' to tenant 测试商户: 1 chunks.
+INFO:openai._base_client:Retrying request to /chat/completions in 0.444592 seconds
+INFO:openai._base_client:Retrying request to /chat/completions in 0.847115 seconds
+WARNING:chat_agent:Sentiment LLM failed: Connection error.
+INFO:openai._base_client:Retrying request to /chat/completions in 0.417231 seconds
+INFO:openai._base_client:Retrying request to /chat/completions in 0.832500 seconds
+WARNING:chat_agent:Rerank failed: Connection error.
+INFO:openai._base_client:Retrying request to /chat/completions in 0.390654 seconds
+INFO:openai._base_client:Retrying request to /chat/completions in 0.918221 seconds
+WARNING:chat_agent:Stream response failed: Connection error.
+INFO:openai._base_client:Retrying request to /chat/completions in 0.389810 seconds
+INFO:openai._base_client:Retrying request to /chat/completions in 0.757745 seconds
+WARNING:chat_agent:Sentiment LLM failed: Connection error.
+INFO:openai._base_client:Retrying request to /chat/completions in 0.449621 seconds
+INFO:openai._base_client:Retrying request to /chat/completions in 0.877816 seconds
+WARNING:chat_agent:Rerank failed: Connection error.
+INFO:openai._base_client:Retrying request to /chat/completions in 0.480501 seconds
+INFO:openai._base_client:Retrying request to /chat/completions in 0.846167 seconds
+WARNING:chat_agent:Stream response failed: Connection error.

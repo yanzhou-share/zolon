@@ -13,6 +13,7 @@ class RetrievalMetrics:
     recall_at_k: float = 0.0
     precision_at_k: float = 0.0
     mrr: float = 0.0
+    ndcg: float = 0.0
     hit_rate: float = 0.0
     avg_distance: float = 0.0
     min_distance: float = 1.0
@@ -51,6 +52,22 @@ def compute_mrr(retrieved_ids: list[str], relevant_ids: set[str]) -> float:
     return 0.0
 
 
+def compute_ndcg(retrieved_ids: list[str], relevant_ids: set[str], k: int = 5) -> float:
+    """Normalized Discounted Cumulative Gain at K."""
+    import math
+    # Ideal DCG: all relevant docs at top positions
+    ideal_relevant = min(len(relevant_ids), k)
+    idcg = sum(1.0 / math.log2(i + 2) for i in range(ideal_relevant))
+    if idcg == 0:
+        return 0.0
+    # Actual DCG
+    dcg = 0.0
+    for i, doc_id in enumerate(retrieved_ids[:k]):
+        if doc_id in relevant_ids:
+            dcg += 1.0 / math.log2(i + 2)
+    return round(dcg / idcg, 4)
+
+
 def compute_hit_rate(retrieved_distances: list[float], threshold: float = 0.5) -> float:
     """1.0 if any result is below the distance threshold, else 0.0. Cosine distance: lower = more relevant."""
     if not retrieved_distances:
@@ -72,6 +89,7 @@ def evaluate_retrieval_single(
     m.recall_at_k = compute_recall_at_k(retrieved_ids, relevant_ids, k)
     m.precision_at_k = compute_precision_at_k(retrieved_ids, relevant_ids, k)
     m.mrr = compute_mrr(retrieved_ids, relevant_ids)
+    m.ndcg = compute_ndcg(retrieved_ids, relevant_ids, k)
     m.hit_rate = compute_hit_rate(retrieved_distances, distance_threshold)
 
     if retrieved_distances:
@@ -88,6 +106,7 @@ class BatchRetrievalReport:
     avg_recall_at_k: float = 0.0
     avg_precision_at_k: float = 0.0
     avg_mrr: float = 0.0
+    avg_ndcg: float = 0.0
     hit_rate: float = 0.0
     avg_distance: float = 0.0
     per_query: list = field(default_factory=list)
@@ -114,6 +133,7 @@ def evaluate_retrieval_batch(query_results: list[dict], k: int = 5, distance_thr
     total_recall = 0.0
     total_precision = 0.0
     total_mrr = 0.0
+    total_ndcg = 0.0
     hits = 0
     all_distances = []
 
@@ -128,6 +148,7 @@ def evaluate_retrieval_batch(query_results: list[dict], k: int = 5, distance_thr
         total_recall += metrics.recall_at_k
         total_precision += metrics.precision_at_k
         total_mrr += metrics.mrr
+        total_ndcg += metrics.ndcg
         hits += metrics.hit_rate
         all_distances.extend(qr.get("retrieved_distances", []))
         report.per_query.append(metrics.to_dict())
@@ -136,6 +157,7 @@ def evaluate_retrieval_batch(query_results: list[dict], k: int = 5, distance_thr
     report.avg_recall_at_k = round(total_recall / n, 4)
     report.avg_precision_at_k = round(total_precision / n, 4)
     report.avg_mrr = round(total_mrr / n, 4)
+    report.avg_ndcg = round(total_ndcg / n, 4)
     report.hit_rate = round(hits / n, 4)
     report.avg_distance = round(sum(all_distances) / len(all_distances), 4) if all_distances else 0.0
 

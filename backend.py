@@ -19,10 +19,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from sse_starlette.sse import EventSourceResponse
 
-from config import llm, embed, chroma, upload, chat as chat_cfg, merchant as merchant_cfg, dashboard as dash_cfg
+from config import llm, embed, chroma, upload, chat as chat_cfg, chunk as chunk_cfg, merchant as merchant_cfg, dashboard as dash_cfg
 from models import ChatRequest, ChatResponse, BatchEvalRequest
 from merchants import load_merchants, save_merchants, generate_api_key, validate_api_key, validate_origin, check_rate_limit
-from document_parser import chunk_text, parse_txt, parse_docx, parse_pdf
+from document_parser import chunk_text, chunk_text_semantic, parse_txt, parse_docx, parse_pdf
 import chat_agent
 from chat_agent import (
     init_llm, _load_embed_model, embed_texts,
@@ -75,21 +75,50 @@ async def global_exception_handler(request: Request, exc: Exception):
 # ========== ChromaDB ==========
 os.makedirs(chroma.PERSIST_DIR, exist_ok=True)
 import chromadb
+
+# ========== Embedding (必须在 ChromaDB collection 之前加载) ==========
+import threading
+from chat_agent import _load_embed_model, BGEEncodingFn
+import chat_agent
+
+chat_agent.embed_ready = threading.Event()
+threading.Thread(target=_load_embed_model, daemon=True).start()
+
+bge_ef = BGEEncodingFn()
+
+
+def _semantic_embed_fn(texts):
+    """语义分块用的 embedding 函数（不加前缀，纯向量）"""
+    from chat_agent import embed_model
+    if embed_model is None:
+        raise RuntimeError("BGE model not loaded")
+    return embed_model.encode(texts, normalize_embeddings=True).tolist()
+
+
 chroma_client = chromadb.PersistentClient(path=chroma.PERSIST_DIR)
-knowledge_collection = chroma_client.get_or_create_collection(
-    name=chroma.DEFAULT_COLLECTION, metadata={"hnsw:space": chroma.HNSW_SPACE}
+
+
+def _get_or_recreate_collection(name: str, ef, meta=None):
+    """获取 collection，若嵌入函数冲突则删除重建"""
+    try:
+        col = chroma_client.get_or_create_collection(name=name, metadata=meta, embedding_function=ef)
+        logger.info(f"Collection '{name}' loaded, count={col.count()}")
+        return col
+    except ValueError:
+        logger.warning(f"Collection '{name}' embedding conflict, recreating...")
+        chroma_client.delete_collection(name)
+        return chroma_client.create_collection(name=name, metadata=meta, embedding_function=ef)
+
+
+knowledge_collection = _get_or_recreate_collection(
+    chroma.DEFAULT_COLLECTION, bge_ef, {"hnsw:space": chroma.HNSW_SPACE}
 )
 
 
 def get_tenant_collection(api_key: str):
-    return chroma_client.get_or_create_collection(
-        name=f"knowledge_{api_key}", metadata={"hnsw:space": chroma.HNSW_SPACE}
+    return _get_or_recreate_collection(
+        f"knowledge_{api_key}", bge_ef, {"hnsw:space": chroma.HNSW_SPACE}
     )
-
-
-# ========== Embedding ==========
-import threading
-threading.Thread(target=_load_embed_model, daemon=True).start()
 
 from eval_tracer import TraceContext, extract_token_counts, extract_distances
 
@@ -112,29 +141,6 @@ def input_collector(state: AgentState) -> dict:
     else:
         merged = new_message
     return {"merged_message": merged, "_trace": TraceContext(session_id)}
-
-
-# ========== LangGraph ==========
-from langgraph.graph import StateGraph, END
-
-def build_graph():
-    workflow = StateGraph(AgentState)
-    workflow.add_node("input_collector", input_collector)
-    workflow.add_node("sentiment_analyzer", sentiment_analyzer)
-    workflow.add_node("query_optimizer", query_optimizer)
-    workflow.add_node("knowledge_retriever", knowledge_retriever)
-    workflow.add_node("response_generator", response_generator)
-    workflow.add_node("handover_response", handover_response)
-    workflow.set_entry_point("input_collector")
-    workflow.add_edge("input_collector", "sentiment_analyzer")
-    workflow.add_conditional_edges("sentiment_analyzer", human_handover_router, {"handover": "handover_response", "continue": "query_optimizer"})
-    workflow.add_edge("query_optimizer", "knowledge_retriever")
-    workflow.add_edge("knowledge_retriever", "response_generator")
-    workflow.add_edge("response_generator", END)
-    workflow.add_edge("handover_response", END)
-    return workflow.compile()
-
-graph = build_graph()
 
 
 # ========== 文件删除辅助 ==========
@@ -218,10 +224,7 @@ async def upload_file(request: Request, file: UploadFile = File(...), x_api_key:
     content = await file.read()
     content_hash = hashlib.md5(content).hexdigest()[:12]
 
-    existing_count = _delete_file_chunks(file.filename, collection)
-    if existing_count > 0:
-        _delete_disk_file(file.filename)
-
+    # 版本管理：不再删除旧 chunks，保留所有版本
     save_path = os.path.join(upload.UPLOAD_DIR, f"{content_hash}_{file.filename}")
     with open(save_path, "wb") as f:
         f.write(content)
@@ -235,18 +238,82 @@ async def upload_file(request: Request, file: UploadFile = File(...), x_api_key:
             text = parse_docx(save_path)
     except Exception as e:
         return JSONResponse(status_code=400, content={"error": f"文件解析失败: {str(e)}"})
-
+    print(text)
     if not text.strip():
         return JSONResponse(status_code=400, content={"error": "文件内容为空"})
 
-    chunks = chunk_text(text)
+    if chunk_cfg.USE_SEMANTIC_CHUNK:
+        chunks = chunk_text_semantic(text, _semantic_embed_fn)
+    else:
+        chunks = chunk_text(text)
     upload_time = datetime.now().isoformat()
-    ids = [f"{content_hash}_chunk_{i}" for i in range(len(chunks))]
-    metadatas = [{"source": file.filename, "content_hash": content_hash, "upload_time": upload_time, "chunk_index": i, "total_chunks": len(chunks)} for i in range(len(chunks))]
+
+    # ========== 版本管理（文件存储） ==========
+    versions_file = os.path.join(upload.UPLOAD_DIR, f"{file.filename}.versions.json")
+    versions = {}
+    if os.path.exists(versions_file):
+        with open(versions_file, "r") as f:
+            versions = json.load(f)
+
+    # 查找最大版本号
+    max_version = 0
+    for v in versions:
+        if v.isdigit() and int(v) > max_version:
+            max_version = int(v)
+    new_version = max_version + 1
+
+    # 旧版本标记 deprecated
+    if str(max_version) in versions:
+        versions[str(max_version)]["status"] = "deprecated"
+
+    # 记录新版本
+    versions[str(new_version)] = {
+        "version": new_version,
+        "status": "active",
+        "upload_time": upload_time,
+        "file_type": suffix,
+        "file_size": file.size or 0,
+        "char_count": len(text),
+        "content_hash": content_hash,
+    }
+
+    with open(versions_file, "w") as f:
+        json.dump(versions, f, ensure_ascii=False, indent=2)
+
+    logger.info(f"Version: file={file.filename}, new=v{new_version}")
+
+    # 新版本 chunks
+    ids = [f"{file.filename}_v{new_version}_chunk_{i}" for i in range(len(chunks))]
+    metadatas = [{
+        "source": file.filename,
+        "version": new_version,
+        "status": "active",
+        "content_hash": content_hash,
+        "upload_time": upload_time,
+        "chunk_index": i,
+        "total_chunks": len(chunks),
+        "file_type": suffix,
+        "file_size": file.size or 0,
+        "char_count": len(text),
+    } for i in range(len(chunks))]
 
     collection.add(ids=ids, documents=chunks, metadatas=metadatas)
-    logger.info(f"Uploaded '{file.filename}' to tenant {merchant_info.get('name')}: {len(chunks)} chunks.")
-    return {"status": "success", "filename": file.filename, "chunks": len(chunks), "file_id": content_hash}
+
+    # 更新旧版本 chunks 的 status 为 deprecated
+    if max_version > 0:
+        old_results = collection.get(where={"$and": [{"source": file.filename}, {"status": "active"}]})
+        if old_results and old_results["ids"]:
+            new_id_set = set(ids)
+            ids_to_deprecated = [i for i in old_results["ids"] if i not in new_id_set]
+            if ids_to_deprecated:
+                collection.update(
+                    ids=ids_to_deprecated,
+                    metadatas=[{"status": "deprecated"}] * len(ids_to_deprecated)
+                )
+                logger.info(f"Deprecated {len(ids_to_deprecated)} old chunks for '{file.filename}'")
+
+    logger.info(f"Uploaded '{file.filename}' v{new_version} to tenant {merchant_info.get('name')}: {len(chunks)} chunks.")
+    return {"status": "success", "filename": file.filename, "version": new_version, "chunks": len(chunks), "file_id": content_hash}
 
 
 @app.get("/upload/list")
@@ -260,9 +327,15 @@ async def list_uploads(x_api_key: str = Header(alias="X-API-Key")):
     if results and results["metadatas"]:
         for meta in results["metadatas"]:
             name = meta["source"]
+            status = meta.get("status", "active")
+            version = meta.get("version", 1)
             if name not in files:
-                files[name] = {"filename": name, "upload_time": meta["upload_time"], "chunks": 0}
+                files[name] = {"filename": name, "upload_time": meta["upload_time"], "chunks": 0, "latest_version": 0, "active_chunks": 0}
             files[name]["chunks"] += 1
+            if version > files[name]["latest_version"]:
+                files[name]["latest_version"] = version
+            if status == "active":
+                files[name]["active_chunks"] += 1
     return {"files": list(files.values())}
 
 
@@ -274,8 +347,129 @@ async def delete_upload(filename: str, x_api_key: str = Header(alias="X-API-Key"
     collection = get_tenant_collection(x_api_key)
     deleted_chunks = _delete_file_chunks(filename, collection)
     _delete_disk_file(filename)
+    # 删除版本 JSON 文件
+    versions_file = os.path.join(upload.UPLOAD_DIR, f"{filename}.versions.json")
+    if os.path.exists(versions_file):
+        os.remove(versions_file)
+    # 大小写不敏感删除
+    import glob
+    for f in glob.glob(os.path.join(upload.UPLOAD_DIR, "*.versions.json")):
+        if os.path.basename(f).lower() == f"{filename}.versions.json".lower():
+            os.remove(f)
+            break
     return {"status": "success", "deleted_chunks": deleted_chunks}
 
+
+@app.get("/upload/{filename}/versions")
+async def get_file_versions(filename: str, x_api_key: str = Header(alias="X-API-Key")):
+    """获取文件版本历史"""
+    merchant_info = validate_api_key(x_api_key)
+    if not merchant_info:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+    versions_file = os.path.join(upload.UPLOAD_DIR, f"{filename}.versions.json")
+    if not os.path.exists(versions_file):
+        return {"filename": filename, "versions": []}
+    with open(versions_file, "r") as f:
+        versions = json.load(f)
+    return {"filename": filename, "versions": sorted(versions.values(), key=lambda x: x["version"], reverse=True)}
+
+
+@app.post("/upload/{filename}/rollback/{version}")
+async def rollback_version(filename: str, version: int, x_api_key: str = Header(alias="X-API-Key")):
+    """回滚到指定版本"""
+    merchant_info = validate_api_key(x_api_key)
+    if not merchant_info:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    # 文件名大小写不敏感：查找实际存在的版本文件
+    import glob
+    versions_file = None
+    # 精确匹配
+    exact_path = os.path.join(upload.UPLOAD_DIR, f"{filename}.versions.json")
+    if os.path.exists(exact_path):
+        # 获取实际文件路径（处理大小写）
+        for f in glob.glob(os.path.join(upload.UPLOAD_DIR, "*.versions.json")):
+            if os.path.basename(f).lower() == f"{filename}.versions.json".lower():
+                versions_file = f
+                break
+    # 大小写不敏感匹配
+    if not versions_file:
+        for f in glob.glob(os.path.join(upload.UPLOAD_DIR, "*.versions.json")):
+            if os.path.basename(f).lower() == f"{filename}.versions.json".lower():
+                versions_file = f
+                break
+    if not versions_file:
+        raise HTTPException(status_code=404, detail="File not found")
+
+    with open(versions_file, "r") as f:
+        versions = json.load(f)
+
+    target_key = str(version)
+    if target_key not in versions:
+        raise HTTPException(status_code=404, detail=f"Version {version} not found")
+
+    # 所有版本设为 deprecated，目标版本设为 active
+    for v in versions.values():
+        v["status"] = "deprecated"
+    versions[target_key]["status"] = "active"
+
+    with open(versions_file, "w") as f:
+        json.dump(versions, f, ensure_ascii=False, indent=2)
+
+    # 同步更新 ChromaDB metadata
+    collection = get_tenant_collection(x_api_key)
+    actual_filename = os.path.basename(versions_file).replace(".versions.json", "")
+    logger.info(f"Rollback sync: filename={actual_filename}, target_version={version}")
+    all_data = collection.get()
+    logger.info(f"ChromaDB chunks: {len(all_data['ids']) if all_data and all_data.get('ids') else 0}")
+
+    ids_to_update = []
+    metadatas_to_update = []
+    if all_data and all_data["ids"]:
+        for id_, meta in zip(all_data["ids"], all_data["metadatas"]):
+            if meta.get("source") == actual_filename:
+                if meta.get("version") == version:
+                    ids_to_update.append(id_)
+                    metadatas_to_update.append({"status": "active"})
+                else:
+                    ids_to_update.append(id_)
+                    metadatas_to_update.append({"status": "deprecated"})
+
+    logger.info(f"Chunks to update: {len(ids_to_update)}")
+    if ids_to_update:
+        collection.update(ids=ids_to_update, metadatas=metadatas_to_update)
+        logger.info("ChromaDB metadata updated")
+
+    # 使用实际文件名（从版本文件路径提取）
+    return {"status": "success", "filename": actual_filename, "rolled_back_to": version}
+
+@app.get("/test/embedding")
+async def test_embedding():
+    x_api_key = "zk_test12345678"
+    query = "如何处理模型输出失败"
+    collection = get_tenant_collection(x_api_key)
+
+    count = collection.count()
+    if count == 0:
+        return {"status": "error", "message": "知识库为空，请先上传文件"}
+
+    # 测试向量检索
+    results = collection.query(query_texts=[query], n_results=5)
+    logger.info(f"Test embedding query: {query}")
+    logger.info(f"Results count: {len(results['documents'][0]) if results['documents'] else 0}")
+
+    docs = results["documents"][0] if results and results["documents"] else []
+    distances = results["distances"][0] if results and results["distances"] else []
+
+    return {
+        "status": "success",
+        "query": query,
+        "collection_count": count,
+        "results": [
+            {"document": doc[:100], "distance": round(dist, 4)}
+            for doc, dist in zip(docs, distances)
+        ]
+    }
 
 # ========== 聊天端点 ==========
 @app.post("/chat", response_model=ChatResponse)
@@ -286,7 +480,11 @@ async def chat(request: Request, chat_req: ChatRequest, x_api_key: str = Header(
 
     initial_state = make_initial_state(chat_req, api_key=x_api_key)
 
+    merged_state = input_collector(initial_state)
+    initial_state.update(merged_state)
+
     # 并行执行
+    # 情感分析
     sentiment_task = sentiment_analyzer(initial_state)
     query_task = query_optimizer(initial_state)
     sentiment_result, query_result = await asyncio.gather(sentiment_task, query_task)
@@ -310,6 +508,9 @@ async def chat(request: Request, chat_req: ChatRequest, x_api_key: str = Header(
 
     knowledge_result = await knowledge_retriever(initial_state, get_tenant_collection(x_api_key))
     initial_state.update(knowledge_result)
+
+    response_result = await response_generator(initial_state)
+    initial_state.update(response_result)
 
     trace = initial_state.get("_trace")
     if trace:
@@ -341,6 +542,8 @@ async def chat_stream(request: Request, chat_req: ChatRequest, x_api_key: str = 
     merged_state = input_collector(initial_state)
     initial_state.update(merged_state)
 
+    # 并行执行
+    # 情感分析
     sentiment_task = sentiment_analyzer(initial_state)
     query_task = query_optimizer(initial_state)
     sentiment_result, query_result = await asyncio.gather(sentiment_task, query_task)
@@ -366,7 +569,8 @@ async def chat_stream(request: Request, chat_req: ChatRequest, x_api_key: str = 
             log_usage(x_api_key, merchant_info.get("name", ""), 0, 0, trace.trace.total_duration_ms if trace else 0, "human")
 
         return EventSourceResponse(handover_stream())
-
+    
+    # 知识库检索
     knowledge_result = await knowledge_retriever(initial_state, get_tenant_collection(x_api_key))
     initial_state.update(knowledge_result)
 
@@ -503,14 +707,15 @@ async def eval_dataset():
 
 
 @app.post("/eval/run-dataset")
-async def eval_run_dataset():
+async def eval_run_dataset(api_key: str = "zk_dftest12345"):
     dataset_path = os.path.join(os.path.dirname(__file__), "eval_dataset.json")
     if not os.path.exists(dataset_path):
         return JSONResponse(status_code=404, content={"error": "Dataset not found"})
     with open(dataset_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
     from eval_pipeline import batch_evaluate
-    report = await batch_evaluate(client=chat_agent.llm_client, test_cases=dataset.get("test_cases", []), knowledge_collection=knowledge_collection)
+    collection = get_tenant_collection(api_key)
+    report = await batch_evaluate(client=chat_agent.llm_client, test_cases=dataset.get("test_cases", []), knowledge_collection=collection)
     return report.to_dict()
 
 

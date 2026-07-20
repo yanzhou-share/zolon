@@ -1,18 +1,29 @@
-"""
-AI Agent 节点模块
-
-LangGraph 6 节点：input_collector, sentiment_analyzer, query_optimizer,
-knowledge_retriever, response_generator, handover_response。
-"""
-
 import json
 import logging
 from typing import Optional
 
-from config import llm as llm_cfg, sentiment as sent_cfg
+from config import llm as llm_cfg, sentiment as sent_cfg, chat as chat_cfg
 from models import AgentState
 
 logger = logging.getLogger(__name__)
+
+# ========== Token 计数工具 ==========
+def count_tokens(text: str) -> int:
+    """统计文本 token 数（使用 BGE 模型的 tokenizer）"""
+    if not text:
+        return 0
+    if embed_model is None:
+        # 模型未加载时粗略估算
+        cn_chars = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
+        other_chars = len(text) - cn_chars
+        return int(cn_chars * 1.5 + other_chars / 4)
+    return len(embed_model.tokenizer.encode(text))
+
+# ========== 上下文治理参数 ==========
+MODEL_MAX_CONTEXT = chat_cfg.MODEL_MAX_CONTEXT
+SAFETY_MARGIN = chat_cfg.SAFETY_MARGIN
+RESPONSE_TOKEN_BUDGET = chat_cfg.RESPONSE_TOKEN_BUDGET
+SYSTEM_PROMPT_TOKENS = 150  # 系统提示估算
 
 # LLM 客户端（延迟初始化）
 llm_client = None
@@ -25,10 +36,13 @@ def init_llm():
 
 # Embedding 模型（延迟加载）
 embed_model = None
+embed_ready = None  # threading.Event，模型加载完成后 set
 
 def _load_embed_model():
-    global embed_model
+    global embed_model, embed_ready
     try:
+        import os
+        os.environ["HF_HUB_OFFLINE"] = "1"
         from sentence_transformers import SentenceTransformer
         from config import embed as embed_cfg
         logger.info(f"Loading embedding model: {embed_cfg.MODEL_NAME}...")
@@ -36,11 +50,46 @@ def _load_embed_model():
         logger.info(f"Embedding model loaded")
     except Exception as e:
         logger.warning(f"Failed to load BGE model: {e}")
+    finally:
+        if embed_ready:
+            embed_ready.set()
 
 def embed_texts(texts: list) -> list:
     if embed_model:
         return embed_model.encode(texts, normalize_embeddings=True).tolist()
     return None
+
+
+# BGE 检索指令前缀（P0 优化：提升检索质量）
+DOC_PREFIX = "为这个句子生成表示以用于检索相关内容："
+QUERY_PREFIX = "为这个句子生成表示以用于检索相关内容："
+
+
+class BGEEncodingFn:
+    """ChromaDB 自定义 EmbeddingFunction，包装 BGE 模型"""
+    is_legacy = False
+
+    def __call__(self, input: list[str]) -> list[list[float]]:
+        if embed_model:
+            prefixed = [DOC_PREFIX + t for t in input]
+            return embed_model.encode(prefixed, normalize_embeddings=True).tolist()
+        raise RuntimeError("BGE model not loaded")
+
+    def embed_query(self, input) -> list:
+        if embed_model:
+            texts = [input] if isinstance(input, str) else input
+            prefixed = [QUERY_PREFIX + t for t in texts]
+            return embed_model.encode(prefixed, normalize_embeddings=True).tolist()
+        raise RuntimeError("BGE model not loaded")
+
+    def embed_documents(self, input: list[str]) -> list[list[float]]:
+        return self(input)
+
+    def name(self) -> str:
+        return "bge-small-zh"
+
+    def json(self):
+        return {"name": self.name()}
 
 # ========== 情感分析 ==========
 def _keyword_sentiment_fallback(text: str) -> str:
@@ -189,51 +238,64 @@ async def knowledge_retriever(state: AgentState, collection=None) -> dict:
             trace.end_node("knowledge_retriever")
         return {"retrieved_knowledge": ""}
 
-    # 语义搜索
-    results = collection.query(query_texts=[search_query], n_results=5)
+    # ========== 阶段 1：语义搜索粗筛 TOP20 ==========
+    COARSE_TOP_K = 20
+    RELEVANCE_THRESHOLD = 0.6
+    results = collection.query(
+        query_texts=[search_query],
+        n_results=COARSE_TOP_K,
+        where={"status": "active"}
+    )
+
+    # all_data = collection.get()
+    # for idx, doc_id in enumerate(all_data["ids"]):
+    #     text = all_data["documents"][idx]
+    #     meta = all_data["metadatas"][idx]
+    #     print(f"\n【ID】{doc_id}")
+    #     print(f"【文本】{text}")
+    #     print(f"【元数据】{meta}")
+
     candidates = []
     distances = []
     if results and results["documents"] and results["documents"][0]:
-        candidates = results["documents"][0]
-        distances = extract_distances(results)
-
-    # 关键词补充
-    keywords = [kw for kw in search_query.split() if len(kw) > 1]
-    all_docs = collection.get()
-    if all_docs and all_docs["documents"]:
-        for doc in all_docs["documents"]:
-            if any(kw in doc for kw in keywords) and doc not in candidates:
+        for doc, dist in zip(
+            results["documents"][0],
+            extract_distances(results),
+        ):
+            if dist <= RELEVANCE_THRESHOLD:
                 candidates.append(doc)
-                distances.append(0.3)
+                distances.append(dist)
 
     if trace:
-        trace.record_retrieval("knowledge_retriever", distances, len(candidates))
+        trace.record_retrieval("knowledge_retriever_coarse", distances, len(candidates))
 
-    # Rerank
-    if len(candidates) > 3 and llm_client:
-        avg_dist = sum(distances) / len(distances) if distances else 1.0
-        if avg_dist < 0.3:
-            candidates = candidates[:3]
-        else:
-            try:
-                rerank_response = await llm_client.chat.completions.create(
-                    model=llm_cfg.MODEL,
-                    messages=[
-                        {"role": "system", "content": "根据客户查询对检索结果进行相关性排序。返回JSON：{\"ranked\": [索引列表]}，从最相关到最不相关。"},
-                        {"role": "user", "content": f"客户查询：{base_query}\n\n检索结果：{json.dumps(candidates, ensure_ascii=False)}"}
-                    ],
-                    response_format={"type": "json_object"}, temperature=0.0, max_tokens=50,
-                )
-                order = json.loads(rerank_response.choices[0].message.content).get("ranked", list(range(len(candidates))))
-                candidates = [candidates[i] for i in order[:3] if i < len(candidates)]
-                if trace:
-                    tokens_in, tokens_out = extract_token_counts(rerank_response.usage)
-                    trace.record_llm_call("knowledge_retriever_rerank", llm_cfg.MODEL, tokens_in, tokens_out)
-            except Exception as e:
-                logger.warning(f"Rerank failed: {e}")
-                candidates = candidates[:3]
+    if not candidates:
+        if trace:
+            trace.end_node("knowledge_retriever")
+        return {"retrieved_knowledge": ""}
+
+    # ========== 阶段 2：LLM Rerank 精排 TOP5 ==========
+    FINE_TOP_K = 5
+    if len(candidates) > FINE_TOP_K and llm_client:
+        try:
+            rerank_response = await llm_client.chat.completions.create(
+                model=llm_cfg.MODEL,
+                messages=[
+                    {"role": "system", "content": "根据客户查询对检索结果进行相关性排序。返回JSON：{\"ranked\": [索引列表]}，从最相关到最不相关。"},
+                    {"role": "user", "content": f"客户查询：{base_query}\n\n检索结果：{json.dumps(candidates[:20], ensure_ascii=False)}"}
+                ],
+                response_format={"type": "json_object"}, temperature=0.0, max_tokens=100,
+            )
+            order = json.loads(rerank_response.choices[0].message.content).get("ranked", list(range(len(candidates))))
+            candidates = [candidates[i] for i in order[:FINE_TOP_K] if i < len(candidates)]
+            if trace:
+                tokens_in, tokens_out = extract_token_counts(rerank_response.usage)
+                trace.record_llm_call("knowledge_retriever_rerank", llm_cfg.MODEL, tokens_in, tokens_out)
+        except Exception as e:
+            logger.warning(f"Rerank failed: {e}")
+            candidates = candidates[:FINE_TOP_K]
     else:
-        candidates = candidates[:3]
+        candidates = candidates[:FINE_TOP_K]
 
     knowledge = "\n".join(candidates)
     if trace:
@@ -261,16 +323,15 @@ async def response_generator(state: AgentState) -> dict:
         reply = f"{SALES_SOP['greeting']}\n\n{knowledge if knowledge else '抱歉，我暂时没有找到相关信息。'}\n\n{SALES_SOP['closing']}"
         return {"reply": reply, "status": "normal"}
 
-    cleaned_history = await _clean_chat_history(chat_history, state.get("merged_message", ""))
-    system_prompt = f"""你是一个智能销售助手。根据知识库中的信息回答客户问题。
+    cleaned_history = await _clean_chat_history(chat_history, state.get("merged_message", ""), knowledge)
+    system_prompt = f"""你是一个智能销售助手。
 
 严格规则：
 1. 始终保持礼貌和专业
-2. **必须严格基于"检索到的知识"回答，禁止编造**
-3. 如果知识库没有相关信息，告知客户建议联系人工客服
+2. 如果"检索到的知识"包含与客户问题相关的信息，基于该知识回答
+3. 如果"检索到的知识"与客户问题无关或为空，**不要提及知识库内容**，直接友好地回答
 4. 回复简洁清晰，不超过 200 字
-5. 结尾使用：{SALES_SOP['closing']}
-6. 客户情绪：{sentiment_label}"""
+5. 客户情绪：{sentiment_label}"""
 
     messages = [{"role": "system", "content": system_prompt}]
     for msg in cleaned_history:
@@ -308,16 +369,15 @@ async def response_generator_stream(state: AgentState):
         yield {"event": "done", "data": json.dumps({"reply": full_reply, "status": "normal", "sentiment_label": state.get("sentiment_label", "neutral"), "sentiment_confidence": state.get("sentiment_confidence", 0.5), "intent": state.get("intent", "other"), "retrieved_knowledge": state.get("retrieved_knowledge", "")})}
         return
 
-    cleaned_history = await _clean_chat_history(chat_history, state.get("merged_message", ""))
-    system_prompt = f"""你是一个智能销售助手。根据知识库中的信息回答客户问题。
+    cleaned_history = await _clean_chat_history(chat_history, state.get("merged_message", ""), knowledge)
+    system_prompt = f"""你是一个智能销售助手。
 
 严格规则：
 1. 始终保持礼貌和专业
-2. **必须严格基于"检索到的知识"回答，禁止编造**
-3. 如果知识库没有相关信息，告知客户建议联系人工客服
+2. 如果"检索到的知识"包含与客户问题相关的信息，基于该知识回答
+3. 如果"检索到的知识"与客户问题无关或为空，**不要提及知识库内容**，直接友好地回答
 4. 回复简洁清晰，不超过 200 字
-5. 结尾使用：{SALES_SOP['closing']}
-6. 客户情绪：{sentiment_label}"""
+5. 客户情绪：{sentiment_label}"""
 
     messages = [{"role": "system", "content": system_prompt}]
     for msg in cleaned_history:
@@ -367,19 +427,61 @@ def human_handover_router(state: AgentState) -> str:
 
 
 # ========== 辅助函数 ==========
-async def _clean_chat_history(chat_history: list, current_query: str) -> list:
-    """清洗对话历史"""
-    if len(chat_history) <= 6:
+def _truncate_by_tokens(messages: list, budget: int) -> list:
+    """按 token 预算从尾部保留消息"""
+    result = []
+    used = 0
+    for msg in reversed(messages):
+        msg_tokens = count_tokens(msg.get("content", ""))
+        if used + msg_tokens > budget:
+            break
+        result.append(msg)
+        used += msg_tokens
+    result.reverse()
+    return result
+
+
+async def _clean_chat_history(chat_history: list, current_query: str, knowledge: str = "") -> list:
+    """基于 token 预算的上下文清洗"""
+    if not chat_history:
         return chat_history
 
+    # 1. 计算当前历史 token 数
+    history_tokens = sum(count_tokens(msg.get("content", "")) for msg in chat_history)
+
+    # 2. 计算可用空间
+    reserved = SYSTEM_PROMPT_TOKENS + RESPONSE_TOKEN_BUDGET + count_tokens(knowledge) + count_tokens(current_query)
+    available = int(MODEL_MAX_CONTEXT * SAFETY_MARGIN) - reserved
+
+    logger.info(f"Context治理: history={history_tokens} tokens, available={available} tokens, margin={MODEL_MAX_CONTEXT}×{SAFETY_MARGIN}")
+
+    # 3. 未超限，原样返回
+    if history_tokens <= available:
+        return chat_history
+
+    logger.info(f"Context超限，触发压缩: {history_tokens} > {available}")
+
+    # 4. 超限，触发压缩
+    # 方案 A：话题切换 → 截断
     topic_switch = await _detect_topic_switch(chat_history, current_query)
     if topic_switch:
-        return chat_history[-6:]
+        truncated = _truncate_by_tokens(chat_history, available)
+        logger.info(f"话题切换截断: {len(chat_history)} → {len(truncated)} 条")
+        return truncated
 
+    # 方案 B：摘要 + 最近N条
     summary = await _summarize_history(chat_history)
     if summary:
-        return [{"role": "system", "content": f"[历史摘要] {summary}"}] + chat_history[-6:]
-    return chat_history[-10:]
+        summary_tokens = count_tokens(f"[历史摘要] {summary}")
+        remaining_budget = available - summary_tokens
+        recent = _truncate_by_tokens(chat_history, remaining_budget)
+        logger.info(f"摘要压缩: 摘要={summary_tokens} tokens, 保留{len(recent)}条原始消息")
+        return [{"role": "system", "content": f"[历史摘要] {summary}"}] + recent
+
+    # 方案 C：直接截断
+    truncated = _truncate_by_tokens(chat_history, available)
+    logger.info(f"直接截断: {len(chat_history)} → {len(truncated)} 条")
+    return truncated
 
 
 async def _detect_topic_switch(chat_history: list, current_query: str) -> bool:

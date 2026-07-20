@@ -105,7 +105,7 @@ def _keyword_sentiment_fallback(text: str) -> str:
 
 async def sentiment_analyzer(state: AgentState) -> dict:
     """情感分析节点"""
-    from eval_tracer import TraceContext, extract_token_counts
+    from eval.eval_tracer import TraceContext, extract_token_counts
     text = state["merged_message"]
     trace = state.get("_trace")
 
@@ -161,7 +161,7 @@ async def sentiment_analyzer(state: AgentState) -> dict:
 # ========== 查询优化 ==========
 async def query_optimizer(state: AgentState) -> dict:
     """查询优化节点"""
-    from eval_tracer import TraceContext, extract_token_counts
+    from eval.eval_tracer import TraceContext, extract_token_counts
     text = state["merged_message"]
     trace = state.get("_trace")
 
@@ -207,7 +207,7 @@ async def query_optimizer(state: AgentState) -> dict:
 # ========== 知识检索 ==========
 async def knowledge_retriever(state: AgentState, collection=None) -> dict:
     """知识检索节点"""
-    from eval_tracer import TraceContext, extract_token_counts, extract_distances
+    from eval.eval_tracer import TraceContext, extract_token_counts, extract_distances
     base_query = state.get("optimized_query") or state["merged_message"]
     search_query = base_query
     trace = state.get("_trace")
@@ -313,7 +313,7 @@ SALES_SOP = {
 
 async def response_generator(state: AgentState) -> dict:
     """非流式响应生成"""
-    from eval_tracer import TraceContext, extract_token_counts
+    from eval.eval_tracer import TraceContext, extract_token_counts
     knowledge = state["retrieved_knowledge"]
     sentiment_label = state.get("sentiment_label", "neutral")
     chat_history = state.get("chat_history", [])
@@ -358,7 +358,7 @@ async def response_generator(state: AgentState) -> dict:
 
 async def response_generator_stream(state: AgentState):
     """流式响应生成"""
-    from eval_tracer import TraceContext, extract_token_counts
+    from eval.eval_tracer import TraceContext, extract_token_counts
     knowledge = state["retrieved_knowledge"]
     sentiment_label = state.get("sentiment_label", "neutral")
     chat_history = state.get("chat_history", [])

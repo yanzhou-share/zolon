@@ -86,10 +86,15 @@ def evaluate_retrieval_single(
     m = RetrievalMetrics(k=k, num_results=len(retrieved_ids))
     m.num_relevant = len(relevant_ids)
 
+    # 计算召回率@K：检索结果中相关文档占所有相关文档的比例
     m.recall_at_k = compute_recall_at_k(retrieved_ids, relevant_ids, k)
+    # 计算精确率@K：检索结果中相关文档占前K个结果的比例
     m.precision_at_k = compute_precision_at_k(retrieved_ids, relevant_ids, k)
+    # 计算平均倒数排名：第一个相关文档排名的倒数
     m.mrr = compute_mrr(retrieved_ids, relevant_ids)
+    # 计算归一化折损累计增益：考虑排名位置的加权相关性评分
     m.ndcg = compute_ndcg(retrieved_ids, relevant_ids, k)
+    # 计算命中率：是否有检索结果的距离低于阈值
     m.hit_rate = compute_hit_rate(retrieved_distances, distance_threshold)
 
     if retrieved_distances:

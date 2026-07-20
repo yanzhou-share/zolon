@@ -8,10 +8,10 @@ from typing import Optional
 from datetime import datetime
 from dataclasses import dataclass, field, asdict
 
-from eval_tracer import TraceContext, RequestTrace
-from eval_retrieval import RetrievalMetrics, evaluate_retrieval_single
-from eval_generation import GenerationMetrics, evaluate_generation
-from eval_e2e import E2EMetrics, evaluate_e2e
+from eval.eval_tracer import TraceContext, RequestTrace
+from eval.eval_retrieval import RetrievalMetrics, evaluate_retrieval_single
+from eval.eval_generation import GenerationMetrics, evaluate_generation
+from eval.eval_e2e import E2EMetrics, evaluate_e2e
 
 logger = logging.getLogger("eval.pipeline")
 
@@ -130,6 +130,9 @@ async def batch_evaluate(
     total_e2e = 0.0
     total_latency = 0.0
     total_tok = 0
+    count_retrieval = 0
+    count_generation = 0
+    count_e2e = 0
 
     for i, tc in enumerate(test_cases):
         query = tc["query"]
@@ -152,6 +155,7 @@ async def batch_evaluate(
             except Exception as e:
                 logger.warning(f"Knowledge query failed for eval: {e}")
 
+        # 检索评估：计算召回率等指标
         retrieval_metrics = None
         if tc.get("relevant_ids") and retrieved_ids:
             rm = evaluate_retrieval_single(
@@ -162,25 +166,31 @@ async def batch_evaluate(
             )
             retrieval_metrics = rm.to_dict()
             total_retrieval += rm.recall_at_k
+            count_retrieval += 1
 
+        # 生成质量评估：评估答案忠实度
         gen_metrics = None
         if context and client:
             try:
                 gm = await evaluate_generation(client, query, context, expected or "", expected)
                 gen_metrics = gm.to_dict()
                 total_generation += gm.faithfulness
+                count_generation += 1
             except Exception as e:
                 logger.warning(f"Batch gen eval query {i} failed: {e}")
 
+        # 端到端评估：评估整体回答质量
         e2e_metrics = None
         if expected and client:
             try:
                 em = await evaluate_e2e(client, query, expected, expected)
                 e2e_metrics = em.to_dict()
                 total_e2e += em.overall_score
+                count_e2e += 1
             except Exception as e:
                 logger.warning(f"Batch e2e eval query {i} failed: {e}")
 
+        # 将当前查询的评估结果添加到报告
         report.per_query_results.append(SingleEvalResult(
             trace_id=f"batch_{batch_id}_{i}",
             timestamp=datetime.now().isoformat(),
@@ -192,10 +202,9 @@ async def batch_evaluate(
             e2e=e2e_metrics,
         ).to_dict())
 
-    n = max(len(test_cases), 1)
-    report.avg_retrieval_score = round(total_retrieval / n, 4)
-    report.avg_generation_score = round(total_generation / n, 4)
-    report.avg_e2e_score = round(total_e2e / n, 4)
+    report.avg_retrieval_score = round(total_retrieval / max(count_retrieval, 1), 4)
+    report.avg_generation_score = round(total_generation / max(count_generation, 1), 4)
+    report.avg_e2e_score = round(total_e2e / max(count_e2e, 1), 4)
     report.total_tokens = total_tok
 
     report_path = os.path.join(METRICS_DIR, f"batch_{batch_id}.json")

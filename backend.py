@@ -120,7 +120,7 @@ def get_tenant_collection(api_key: str):
         f"knowledge_{api_key}", bge_ef, {"hnsw:space": chroma.HNSW_SPACE}
     )
 
-from eval_tracer import TraceContext, extract_token_counts, extract_distances
+from eval.eval_tracer import TraceContext, extract_token_counts, extract_distances
 
 
 # ========== 会话管理 ==========
@@ -648,7 +648,7 @@ async def get_merchant_billing(api_key: str, month: str = None, admin_key: str =
 async def get_eval_trends(days: int = 30, api_key: str = None, admin_key: str = Header(alias="X-Admin-Key")):
     if admin_key != merchant_cfg.ADMIN_SECRET:
         raise HTTPException(status_code=403, detail="Invalid admin key")
-    from eval_trends import get_trend
+    from eval.eval_trends import get_trend
     return {"trends": get_trend(days, api_key)}
 
 
@@ -656,7 +656,7 @@ async def get_eval_trends(days: int = 30, api_key: str = None, admin_key: str = 
 async def get_eval_alerts(days: int = 7, api_key: str = None, admin_key: str = Header(alias="X-Admin-Key")):
     if admin_key != merchant_cfg.ADMIN_SECRET:
         raise HTTPException(status_code=403, detail="Invalid admin key")
-    from eval_alerts import get_recent_alerts, get_alert_stats
+    from eval.eval_alerts import get_recent_alerts, get_alert_stats
     return {"alerts": get_recent_alerts(days, api_key), "stats": get_alert_stats(days)}
 
 
@@ -664,7 +664,7 @@ async def get_eval_alerts(days: int = 7, api_key: str = None, admin_key: str = H
 async def run_manual_eval(admin_key: str = Header(alias="X-Admin-Key")):
     if admin_key != merchant_cfg.ADMIN_SECRET:
         raise HTTPException(status_code=403, detail="Invalid admin key")
-    from eval_scheduler import daily_eval_task
+    from eval.eval_scheduler import daily_eval_task
     report = await daily_eval_task(chat_agent.llm_client, knowledge_collection)
     if report:
         return {"status": "success", "report": report.to_dict()}
@@ -675,7 +675,7 @@ async def run_manual_eval(admin_key: str = Header(alias="X-Admin-Key")):
 async def get_latest_eval_report(report_type: str = "daily", admin_key: str = Header(alias="X-Admin-Key")):
     if admin_key != merchant_cfg.ADMIN_SECRET:
         raise HTTPException(status_code=403, detail="Invalid admin key")
-    from eval_scheduler import get_latest_report
+    from eval.eval_scheduler import get_latest_report
     return get_latest_report(report_type)
 
 
@@ -686,20 +686,20 @@ async def health():
 
 @app.get("/eval/stats")
 async def eval_stats():
-    from eval_pipeline import get_eval_stats
+    from eval.eval_pipeline import get_eval_stats
     return get_eval_stats()
 
 
 @app.post("/eval/batch")
 async def eval_batch(request: BatchEvalRequest):
-    from eval_pipeline import batch_evaluate
+    from eval.eval_pipeline import batch_evaluate
     report = await batch_evaluate(client=chat_agent.llm_client, test_cases=request.test_cases, knowledge_collection=knowledge_collection)
     return report.to_dict()
 
 
 @app.get("/eval/dataset")
 async def eval_dataset():
-    dataset_path = os.path.join(os.path.dirname(__file__), "eval_dataset.json")
+    dataset_path = os.path.join(os.path.dirname(__file__), "eval", "eval_dataset.json")
     if os.path.exists(dataset_path):
         with open(dataset_path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -708,12 +708,12 @@ async def eval_dataset():
 
 @app.post("/eval/run-dataset")
 async def eval_run_dataset(api_key: str = "zk_dftest12345"):
-    dataset_path = os.path.join(os.path.dirname(__file__), "eval_dataset.json")
+    dataset_path = os.path.join(os.path.dirname(__file__), "eval", "eval_dataset.json")
     if not os.path.exists(dataset_path):
         return JSONResponse(status_code=404, content={"error": "Dataset not found"})
     with open(dataset_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
-    from eval_pipeline import batch_evaluate
+    from eval.eval_pipeline import batch_evaluate
     collection = get_tenant_collection(api_key)
     report = await batch_evaluate(client=chat_agent.llm_client, test_cases=dataset.get("test_cases", []), knowledge_collection=collection)
     return report.to_dict()

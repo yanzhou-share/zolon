@@ -19,18 +19,23 @@
 ## 功能特性
 
 ### 核心功能
-- **RAG 知识库问答**: 混合检索（语义+关键词）+ Q&A 配对
+- **RAG 知识库问答**: 递归分块 + 语义分块 + 多阶段检索（向量搜索 + LLM Rerank）
 - **多租户 SaaS**: API Key 认证、域名白名单、租户知识库隔离
-- **文档支持**: txt/docx/md/pdf，表格自动转 Markdown
+- **文档支持**: txt/docx/md/pdf，表格自动转 Markdown，Q&A 配对
 - **流式响应**: SSE 逐 token 渲染
 - **情感分析**: 关键词优先 + LLM 兜底，区分产品反馈和愤怒
 - **长对话治理**: 话题检测 + 对话摘要 + 滑动窗口
 
 ### 运营功能
-- **管理后台**: 商户 CRUD、文档管理、助手名称配置
+- **管理后台**: 商户 CRUD、文档管理、版本控制
 - **运营仪表盘**: 用量统计、每日趋势、商户排行
 - **计费系统**: 每千 Token 计价、月度免费额度
-- **评估自动化**: 定时评估 + 趋势追踪 + 告警
+
+### 评估系统
+- **多维度评估**: 检索质量（Recall/Precision/MRR/NDCG）、生成质量（Faithfulness/Relevancy/Hallucination）、端到端质量（Correctness/Quality/Satisfaction）
+- **批量评估**: 35 条测试用例，覆盖 6 个文档
+- **趋势追踪**: 指标趋势图表，支持按商户筛选
+- **自动告警**: 指标异常检测（忠实度低、幻觉率高、延迟高）
 
 ### 嵌入式 Widget
 - 一行代码集成到任意网站
@@ -41,29 +46,38 @@
 
 ```
 zolon/
-├── backend.py          # 主入口（FastAPI + LangGraph）
-├── config.py           # 配置管理（LLM/Embedding/Chroma等）
-├── models.py           # 数据模型（Pydantic/TypedDict）
-├── merchants.py        # 商户管理（API Key/白名单/限流）
-├── document_parser.py  # 文档解析（txt/docx/pdf/表格/分块）
-├── chat_agent.py       # Agent 节点（情感/查询/检索/生成）
-├── database.py         # SQLite 数据库（用量/计费/告警）
-├── eval_scheduler.py   # 定时评估任务
-├── eval_trends.py      # 指标趋势追踪
-├── eval_alerts.py      # 告警系统
-├── eval_pipeline.py    # 评估编排
-├── eval_retrieval.py   # 检索评估指标
-├── eval_generation.py  # 生成质量评估
-├── eval_e2e.py         # 端到端评估
-├── eval_tracer.py      # 请求追踪
-├── app.py              # Streamlit 前端
-├── widget.js           # 嵌入式聊天组件
-├── test_backend.py     # 测试用例（38个）
-├── requirements.txt    # 依赖列表
-├── .env.example        # 配置示例
-├── merchants.json      # 商户配置
-├── eval_dataset.json   # 评估测试集（30条）
-└── RESUME_PROJECT.md   # 简历项目描述
+├── backend.py              # 主入口（FastAPI + LangGraph）
+├── config.py               # 配置管理
+├── models.py               # 数据模型
+├── merchants.py            # 商户管理
+├── document_parser.py      # 文档解析（递归分块 + 语义分块）
+├── chat_agent.py           # Agent 节点（情感/查询/检索/生成）
+├── database.py             # SQLite 数据库
+├── text_cleaner.py         # 文本清洗
+├── app.py                  # Streamlit 前端
+│
+├── eval/                   # 评估模块
+│   ├── eval_pipeline.py    # 评估编排
+│   ├── eval_retrieval.py   # 检索评估指标
+│   ├── eval_generation.py  # 生成质量评估
+│   ├── eval_e2e.py         # 端到端评估
+│   ├── eval_tracer.py      # 请求追踪
+│   ├── eval_trends.py      # 指标趋势追踪
+│   ├── eval_alerts.py      # 告警系统
+│   ├── eval_scheduler.py   # 定时评估任务
+│   └── eval_dataset.json   # 评估测试集（35条）
+│
+├── tests/                  # 测试用例
+│   ├── test_backend.py     # 后端测试（35个）
+│   ├── test_eval.py        # 评估系统测试（40个）
+│   ├── test_retrieval_recall.py
+│   └── ...
+│
+├── rag_doc/                # RAG 测试文档
+├── eval_metrics/           # 评估指标输出
+├── requirements.txt        # 依赖列表
+├── .env.example            # 配置示例
+└── merchants.json          # 商户配置
 ```
 
 ## 快速开始
@@ -109,6 +123,9 @@ streamlit run app.py
 | `LLM_TEMPERATURE` | 0.3 | 温度参数 |
 | `ADMIN_SECRET` | admin123 | 管理员密钥 |
 | `CHUNK_SIZE` | 500 | 文档分块大小 |
+| `CHUNK_OVERLAP` | 50 | 分块重叠 |
+| `USE_SEMANTIC_CHUNK` | false | 启用语义分块 |
+| `SEMANTIC_THRESHOLD` | 0.5 | 语义断点阈值 |
 | `MAX_HISTORY` | 10 | 最大对话历史 |
 
 ## API 接口
@@ -152,9 +169,12 @@ curl http://localhost:8000/admin/merchants \
 ### 评估接口
 
 ```bash
-# 运行评估
-curl -X POST http://localhost:8000/admin/eval/run \
+# 运行数据集评估
+curl -X POST http://localhost:8000/eval/run-dataset \
   -H "X-Admin-Key: admin123"
+
+# 查看评估统计
+curl http://localhost:8000/eval/stats
 
 # 查看趋势
 curl http://localhost:8000/admin/eval/trends \
@@ -164,7 +184,14 @@ curl http://localhost:8000/admin/eval/trends \
 ## 运行测试
 
 ```bash
-pytest test_backend.py -v
+# 评估系统测试
+pytest tests/test_eval.py -v
+
+# 后端测试
+pytest tests/test_backend.py -v
+
+# 所有测试
+pytest tests/ -v
 ```
 
 ## 嵌入式 Widget

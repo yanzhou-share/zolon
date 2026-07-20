@@ -5,15 +5,15 @@ import json
 import time
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
-from eval_tracer import TraceContext, RequestTrace, NodeTrace, extract_token_counts, extract_distances
-from eval_retrieval import (
+from eval.eval_tracer import TraceContext, RequestTrace, NodeTrace, extract_token_counts, extract_distances
+from eval.eval_retrieval import (
     RetrievalMetrics, BatchRetrievalReport,
     compute_recall_at_k, compute_precision_at_k, compute_mrr, compute_hit_rate,
     evaluate_retrieval_single, evaluate_retrieval_batch,
 )
-from eval_generation import GenerationMetrics, evaluate_generation
-from eval_e2e import E2EMetrics, evaluate_e2e
-from eval_pipeline import SingleEvalResult, BatchEvalReport, auto_evaluate_request, get_eval_stats
+from eval.eval_generation import GenerationMetrics, evaluate_generation
+from eval.eval_e2e import E2EMetrics, evaluate_e2e
+from eval.eval_pipeline import SingleEvalResult, BatchEvalReport, auto_evaluate_request, get_eval_stats
 
 
 # ─── TraceContext Tests ───

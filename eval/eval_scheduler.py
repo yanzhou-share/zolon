@@ -13,7 +13,7 @@ import logging
 import os
 from datetime import datetime, timedelta
 
-from eval_pipeline import batch_evaluate, get_eval_stats
+from eval.eval_pipeline import batch_evaluate, get_eval_stats
 
 logger = logging.getLogger("eval.scheduler")
 
@@ -73,7 +73,7 @@ async def daily_eval_task(llm_client, knowledge_collection=None):
     logger.info(f"每日评估完成: {report.total_queries} 条查询, 耗时 {duration:.1f}s")
 
     # 检查指标是否下降
-    from eval_alerts import check_and_alert
+    from eval.eval_alerts import check_and_alert
     check_and_alert({
         "faithfulness": report.avg_generation_score,
         "hallucination": 1.0 - report.avg_generation_score,  # 近似计算

@@ -305,7 +305,7 @@
       "id": "TC035",
       "query": "智能办公一体机怎么检索历史文档？",
       "expected_answer": "在触摸屏或小程序端输入关键词即可检索历史文档",
-      "relevant_ids": ["FAQ.md_v1_chunk_0"],
+      "relevant_ids": ["notice.md_v1_chunk_1"],
       "intent": "feature_inquiry",
       "category": "faq_search"
     }
